@@ -6,9 +6,4 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-
-extern crate gblib;
-
-fn main() {
-    println!("Hello, world!");
-}
+pub mod cpu;
