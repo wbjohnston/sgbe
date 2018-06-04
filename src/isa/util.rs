@@ -8,7 +8,7 @@
 
 //! Utility functions
 
-use super::types::{Word, DoubleWord};
+use super::types::{DoubleWord, Word};
 
 /// Return a double word composed from two [`Word`]s
 pub fn pack_words(lo: Word, hi: Word) -> DoubleWord {

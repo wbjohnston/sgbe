@@ -23,12 +23,9 @@ pub mod apu;
 
 pub mod cartridge;
 
-
 /// Gameboy Hardware
 #[derive(Debug, Clone, Copy)]
-pub struct Hardware {
-
-}
+pub struct Hardware {}
 
 impl Bus for Hardware {
     fn read(&self, address: Address) -> Word {

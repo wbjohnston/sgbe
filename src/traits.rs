@@ -6,7 +6,7 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use isa::types::{Word, DoubleWord, Address};
+use isa::types::{Address, DoubleWord, Word};
 use isa::util::pack_words;
 
 pub trait Bus {

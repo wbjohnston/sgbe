@@ -12,10 +12,10 @@
 // TODO: (will) implement all functions for big-endian platforms
 // TODO: (will) implement gameboy color register file
 
-use isa::{Flag, Instruction, Register16, Register8};
-use isa::types::{Immediate, Immediate16, Address, Word, DoubleWord};
 use isa::disassemble::decode;
-use isa::util::{pack_words, split_word, split_doubleword};
+use isa::types::{Address, DoubleWord, Immediate, Immediate16, Word};
+use isa::util::{pack_words, split_doubleword, split_word};
+use isa::{Flag, Instruction, Register16, Register8};
 
 use traits::Bus;
 

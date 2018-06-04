@@ -12,7 +12,7 @@ pub mod types;
 
 pub mod util;
 
-use self::types::{Address, Word, DoubleWord, Immediate, Immediate16, SignedImmediate};
+use self::types::{Address, DoubleWord, Immediate, Immediate16, SignedImmediate, Word};
 
 // An 8-bit register
 #[derive(Debug, Copy, Clone)]

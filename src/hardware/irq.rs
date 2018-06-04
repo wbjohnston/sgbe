@@ -6,10 +6,7 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-
 /// TODO: (will)
 pub struct IRQ;
 
-impl IRQ {
-
-}
+impl IRQ {}
