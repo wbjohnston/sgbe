@@ -6,13 +6,7 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-#[macro_use]
-extern crate failure;
-extern crate lib;
+#[derive(Debug, Copy, Clone)]
+pub struct APU {}
 
-use failure::Error;
-
-fn main() -> Result<(), Error> {
-    println!("Hello world!");
-    Ok(())
-}
+impl APU {}

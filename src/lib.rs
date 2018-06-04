@@ -6,13 +6,14 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-#[macro_use]
-extern crate failure;
-extern crate lib;
+#![cfg_attr(feature = "nightly", feature(test))]
 
-use failure::Error;
+extern crate log;
 
-fn main() -> Result<(), Error> {
-    println!("Hello world!");
-    Ok(())
-}
+pub mod traits;
+
+pub mod cpu;
+
+pub mod hardware;
+
+pub mod isa;

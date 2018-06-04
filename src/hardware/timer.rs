@@ -6,4 +6,11 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-pub mod cpu;
+/// A gameboy timer
+pub struct Timer {}
+
+impl Timer {
+    pub fn new() -> Timer {
+        unimplemented!()
+    }
+}
