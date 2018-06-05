@@ -6,11 +6,24 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-/// A gameboy timer
-pub struct Timer {}
+#![cfg_attr(feature = "nightly", feature(test))]
 
-impl Timer {
-    pub fn new() -> Timer {
-        unimplemented!()
-    }
-}
+#[macro_use]
+extern crate log;
+#[macro_use]
+extern crate smallvec;
+
+#[macro_use]
+extern crate failure;
+
+pub mod bios;
+
+pub mod cartridge;
+
+mod traits;
+
+mod hardware;
+
+pub mod system;
+
+mod isa;

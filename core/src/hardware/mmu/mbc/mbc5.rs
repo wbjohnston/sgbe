@@ -6,33 +6,26 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-//! Gameboy hardware components (excludes CPU)
+//! MBC5 memory bank controller
 
 use isa::types::{Address, Word};
-use traits::Bus;
+use traits::Memory;
+use super::MBC;
 
-pub mod gpu;
-
-pub mod mmu;
-
-pub mod timer;
-
-pub mod irq;
-
-pub mod apu;
-
-pub mod cartridge;
-
-/// Gameboy Hardware
+/// MBC5 memory bank controller
 #[derive(Debug, Clone, Copy)]
-pub struct Hardware {}
+pub struct MBC5;
 
-impl Bus for Hardware {
+impl Memory for MBC5 {
     fn read(&self, address: Address) -> Word {
+        // TODO: (will) implement me
         unimplemented!()
     }
 
     fn write(&mut self, address: Address, value: Word) {
+        // TODO: (will) implement me
         unimplemented!()
     }
 }
+
+impl MBC for MBC5 {}

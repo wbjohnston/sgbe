@@ -6,7 +6,18 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-/// TODO: (will)
-pub struct IRQ;
+//! Gameboy hardware components
 
-impl IRQ {}
+use isa::types::{Address, Word};
+
+pub mod cpu;
+pub use self::cpu::CPU;
+
+pub mod gpu;
+pub use self::gpu::GPU;
+
+pub mod mmu;
+pub use self::mmu::MMU;
+
+pub mod apu;
+pub use self::apu::APU;

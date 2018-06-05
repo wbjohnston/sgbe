@@ -10,17 +10,17 @@
 
 use super::types::{Address, Immediate, Immediate16, SignedImmediate};
 use super::{Flag, Instruction, Register16, Register8};
-use traits::Bus;
+use traits::Memory;
 
 /// Decode an instruction
-pub fn decode<B: Bus>(address: Address, bus: &B) -> Instruction {
+pub fn decode<B: Memory>(address: Address, bus: &B) -> Instruction {
     use self::Flag::*;
     use self::Instruction::*;
     use self::Register16::*;
     use self::Register8::*;
 
     /// Decode a `0xCB` prefixed instruction
-    fn decode_cb<B: Bus>(address: Address, bus: &B) -> Instruction {
+    fn decode_cb<B: Memory>(address: Address, bus: &B) -> Instruction {
         // TODO: (will) implement
         let encoded = bus.read(address);
 

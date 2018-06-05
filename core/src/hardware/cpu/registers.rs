@@ -6,61 +6,14 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-//! Gameboy CPU struct
+//! Gameboy CPU register file
 
-// NOTE: (will) both the gb cpu and x86_64 arch are little endian
-// TODO: (will) implement all functions for big-endian platforms
-// TODO: (will) implement gameboy color register file
-
-use isa::disassemble::decode;
-use isa::types::{Address, DoubleWord, Immediate, Immediate16, Word};
+use isa::types::{DoubleWord, Word};
 use isa::util::{pack_words, split_doubleword, split_word};
-use isa::{Flag, Instruction, Register16, Register8};
 
-use traits::Bus;
-
-pub const CYCLES_PER_SECOND: usize = 4_194_304;
-
-/// A Gameboy central processing unit
-#[derive(Debug, Clone)]
-pub struct CPU {
-    mir: bool,
-    is_halted: bool,
-    registers: Registers,
-}
-
-impl CPU {
-    pub fn new() -> CPU {
-        CPU {
-            // master interrup request
-            mir: false,
-            is_halted: false,
-            registers: Registers::new(),
-        }
-    }
-
-    /// Execute the current instruction and advance the CPU forward one step, Returns the
-    /// number of cycles used
-    pub fn tick<B: Bus>(&mut self, bus: &mut B) -> u8 {
-        let instruction = decode(self.registers.pc, bus);
-        self.registers.pc += instruction.size() as Address;
-
-        self.execute(instruction);
-        let cycles_used = instruction.cycles();
-        cycles_used
-    }
-
-    /// Execute an instruction
-    fn execute(&mut self, instr: Instruction) {
-        match instr {
-            _ => unimplemented!(),
-        }
-    }
-}
-
-/// A Gameboy register file
+/// A Gameboy CPU register file
 #[derive(Debug, Copy, Clone)]
-struct Registers {
+pub struct Registers {
     pub a: Word,
     pub f: Word,
     pub b: Word,

@@ -6,8 +6,15 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-/// A gameboy cartridge
-#[derive(Debug, Clone)]
-pub struct Cartridge {}
+//! Switchable work ram trait and implementations
 
-impl Cartridge {}
+use traits::Memory;
+
+mod fixed;
+pub use self::fixed::Fixed;
+
+mod banked;
+pub use self::banked::Banked;
+
+/// Switchable work ram
+pub trait SWRAM: Memory {}

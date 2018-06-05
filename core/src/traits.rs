@@ -9,7 +9,15 @@
 use isa::types::{Address, DoubleWord, Word};
 use isa::util::pack_words;
 
-pub trait Bus {
+/// An emulator
+///
+/// TODO: (will) better documentation
+pub trait Emulator {
+    fn emulate(&self, cycles: usize);
+}
+
+/// A bus to read and write data
+pub trait Memory {
     /// Read a value from an address
     fn read(&self, address: Address) -> Word;
 

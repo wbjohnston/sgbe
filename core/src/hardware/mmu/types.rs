@@ -6,13 +6,18 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-#[macro_use]
-extern crate failure;
-extern crate lib;
+use isa::types::Word;
 
-use failure::Error;
+const KB: usize = 1024;
 
-fn main() -> Result<(), Error> {
-    println!("Hello world!");
-    Ok(())
-}
+/// 4KB memory
+pub type Memory4KB = [Word; 4 * KB];
+
+/// 8KB memory
+pub type Memory8KB = [Word; 8 * KB];
+
+/// 16KB memory
+pub type Memory16KB = [Word; 16 * KB];
+
+/// 32KB memory
+pub type Memory32KB = [Word; 32 * KB];

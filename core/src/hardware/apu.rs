@@ -6,7 +6,15 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+use traits::Emulator;
+
 #[derive(Debug, Copy, Clone)]
 pub struct APU {}
 
 impl APU {}
+
+impl Emulator for APU {
+    fn emulate(&self, cycles: usize) {
+        unimplemented!()
+    }
+}

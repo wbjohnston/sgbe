@@ -6,5 +6,11 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-/// A Gameboy graphics processing unit
-pub struct GPU {}
+#[derive(Clone, Copy)]
+pub struct SystemBIOS([u8; 0x100]); 
+
+impl<'a> From<&'a [u8]> for SystemBIOS {
+    fn from(stream: &'a [u8]) -> SystemBIOS {
+        unimplemented!()
+    }
+}
