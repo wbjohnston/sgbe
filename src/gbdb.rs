@@ -14,6 +14,9 @@ use core::bios::SystemBIOS;
 #[macro_use]
 extern crate failure;
 
+extern crate common;
+use common::try_read_rom;
+
 use failure::Error;
 use std::io::{self, Write, Read, BufRead, BufReader};
 use std::fs;
@@ -35,19 +38,12 @@ enum Command {
     Step,
 }
 
-fn read_rom<'a>(path: &'a str) -> io::Result<&[u8]> {
-    let mut buffer = String::new();
-    let handle = fs::File::open(path)?;
-    handle.read_to_string(&mut buffer)?;
-    Ok(buffer.as_bytes())
-}
-
 fn main() -> Result<(), Error> {
     let bios_path = "./roms/bios.gb";
     let rom_path = "./roms/tetris.gb";
 
-    let bios = SystemBIOS::from(read_rom(bios_path)?);
-    let cartridge = Cartridge::from(read_rom(rom_path)?);
+    let bios = SystemBIOS::from(try_read_rom(bios_path)?);
+    let cartridge = Cartridge::try_parse_bytes(try_read_rom(rom_path)?)?;
 
     let mut emulator = GB::new(bios, cartridge);
 

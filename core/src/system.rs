@@ -10,55 +10,54 @@
 
 use bios::SystemBIOS;
 
-use hardware::{CPU, MMU, GPU, APU};
-use cartridge::Cartridge;
-use traits::Emulator;
-use hardware::mmu::{SWRAM, MBC};
-use hardware::mmu::swram;
+use hardware::cartridge::Cartridge;
+use hardware::mmu::swram::{self, SWRAM};
+use hardware::{APU, CPU, GPU, MMU};
 
 /// Gameboy
-pub type GB<M: MBC> = System<M, swram::Fixed>;
+pub type GB = System<swram::Fixed>;
 
 /// Gameboy color
-pub type CGB<M: MBC> = System<M, swram::Banked>;
+pub type CGB = System<swram::Banked>;
 
 /// A Gameboy sytem
-#[derive(Clone)]
-pub struct System<M: MBC, S: SWRAM> {
+pub struct System<S: SWRAM> {
     bios: SystemBIOS,
     cpu: CPU,
-    mmu: MMU<M, S>,
+    mmu: MMU<S>,
     gpu: GPU,
 }
 
-impl<M: MBC + Default> GB<M> {
-    pub fn new(bios: SystemBIOS, cartridge: Cartridge) -> GB<M> {
-        GB {
+impl<S: SWRAM> System<S> {
+    /// Create a new system with no loaded catridge
+    pub fn new(bios: SystemBIOS) -> Self {
+        System {
             bios: bios,
             cpu: CPU::new(),
-            mmu: MMU::from(cartridge),
+            mmu: MMU::new(),
             gpu: GPU::new(),
         }
     }
-}
 
-impl <M: MBC + Default> CGB<M> {
-    fn new(bios: SystemBIOS, cartridge: Cartridge) -> CGB<M> {
-        CGB {
-            bios: bios,
-            cpu: CPU::new(),
-            mmu: MMU::from(cartridge),
-            gpu: GPU::new(),
-        }
+    /// Load a catridge into the system
+    pub fn load(&mut self, cartridge: Cartridge) {
+        self.mmu.load(cartridge)
+    }
+
+    /// Unload the current cartridge from the sytem
+    pub fn unload(&mut self) {
+        self.mmu.unload()
     }
 }
 
-impl<M: MBC, S: SWRAM> System<M, S> {
+impl<S: SWRAM> System<S> {
     pub fn step(&mut self) -> u8 {
         unimplemented!()
     }
 
-    pub fn emulate(&self, cycles: usize) {
-        unimplemented!()
+    pub fn emulate(&mut self, cycles: usize) {
+        // FIXME: (will) this probably isn't right
+        self.cpu.emulate(cycles, &mut self.mmu);
+        self.gpu.emulate(cycles, &mut self.mmu);
     }
 }

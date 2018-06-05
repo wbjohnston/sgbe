@@ -8,9 +8,9 @@
 
 //! Fixed switchable work ram
 
-use traits::Memory;
+use hardware::Memory;
 use super::SWRAM;
-use isa::types::{Address, Word};
+use isa::{Address, Word};
 
 /// Fixed switchable work ram
 #[derive(Debug, Copy, Clone)]

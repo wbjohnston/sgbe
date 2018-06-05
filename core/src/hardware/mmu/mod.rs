@@ -6,17 +6,13 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-pub mod mbc;
-pub use self::mbc::MBC;
-
 mod types;
 
 pub mod swram;
 pub use self::swram::SWRAM;
 
-use cartridge::Cartridge;
-use isa::types::{Address, Word};
-use traits::{Memory, Emulator};
+use super::{Cartridge, Memory};
+use isa::{Address, Word};
 
 /// Rom
 const ROM0_OFFSET: Address = 0x0000;
@@ -70,10 +66,8 @@ const HRAM_SIZE: usize = (HRAM_END - HRAM_OFFSET) as usize;
 const INTERRUPT_ENABLE_REGISTER_ADDRESS: Address = 0xFFFF;
 
 /// A Gameboy Memory management unit
-#[derive(Clone)]
-pub struct MMU<M: MBC, S: SWRAM> {
-    rom0: [Word; ROM0_SIZE], // home rom
-    srom: M,                 // switchable rom bank
+pub struct MMU<S: SWRAM> {
+    cartridge: Option<Cartridge>,
     vram: [Word; VRAM_SIZE], // video ram
     eram: [Word; ERAM_SIZE], // external ram
     wram: [Word; WRAM_SIZE], // work ram
@@ -84,17 +78,32 @@ pub struct MMU<M: MBC, S: SWRAM> {
     ier: Word,               // interrupt enable register
 }
 
-impl<M: MBC, S: SWRAM> MMU<M, S> {
+impl<S: SWRAM> MMU<S> {
+    /// Create a new MMU
+    pub fn new() -> Self {
+        unimplemented!()
+    }
+
+    /// Load a cartridge into the MMU
+    pub fn load(&mut self, cartridge: Cartridge) {
+        self.cartridge = Some(cartridge);
+    }
+
+    /// Unload the current catridge from the MMU
+    pub fn unload(&mut self) {
+        self.cartridge = None;
+    }
+
     /// Read a word from memory
     fn read_inner(&self, addr: Address) -> Word {
         match addr {
-            ROM0_OFFSET...ROM0_END => self.rom0[(addr - ROM0_OFFSET) as usize],
-            SROM_OFFSET...SROM_END => self.srom.read(addr - SROM_OFFSET),
+            ROM0_OFFSET...ROM0_END => unimplemented!(),
+            SROM_OFFSET...SROM_END => unimplemented!(),
             ERAM_OFFSET...ERAM_END => self.eram[(addr - ERAM_OFFSET) as usize],
             VRAM_OFFSET...VRAM_END => self.vram[(addr - VRAM_OFFSET) as usize],
             WRAM_OFFSET...WRAM_END => self.wram[(addr - WRAM_OFFSET) as usize],
             SWRAM_OFFSET...SWRAM_END => self.swram.read(addr - SWRAM_OFFSET),
-            ECHO_RAM_OFFSET...ECHO_RAM_END => self.rom0[(addr - ECHO_RAM_OFFSET) as usize],
+            ECHO_RAM_OFFSET...ECHO_RAM_END => unimplemented!(),
             OAM_OFFSET...OAM_END => self.oam[(addr - OAM_OFFSET) as usize],
             UNUSABLE_MEMORY_OFFSET...UNUSABLE_MEMORY_END => unreachable!(), // its not usable
             IOM_OFFSET...IOM_END => self.iom[(addr - IOM_OFFSET) as usize],
@@ -120,23 +129,17 @@ impl<M: MBC, S: SWRAM> MMU<M, S> {
             IOM_OFFSET...IOM_END => unimplemented!(),
             HRAM_OFFSET...HRAM_END => unimplemented!(),
             INTERRUPT_ENABLE_REGISTER_ADDRESS => self.ier = value,
-            _ => unimplemented!()
+            _ => unimplemented!(),
         }
     }
 }
 
-impl<M: MBC, S: SWRAM> Memory for MMU<M, S> {
+impl<S: SWRAM> Memory for MMU<S> {
     fn read(&self, address: Address) -> Word {
         self.read_inner(address)
     }
 
     fn write(&mut self, address: Address, value: Word) {
         self.write_inner(address, value)
-    }
-}
-
-impl<M: MBC, S: SWRAM> From<Cartridge> for MMU<M, S> {
-    fn from(cartridge: Cartridge) -> Self {
-        unimplemented!()
     }
 }

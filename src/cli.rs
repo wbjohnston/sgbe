@@ -22,11 +22,11 @@ fn main() -> Result<(), Error> {
     let _ = args.next();
 
     let cartridge = {
-        let fh = fs::File::open(args.next().unwrap())?;
+        let mut fh = fs::File::open(args.next().unwrap())?;
         let mut buffer = String::new();
         let _ = fh.read_to_string(&mut buffer)?;
         let bytes = buffer.as_bytes();
-        Cartridge::from(bytes)
+        Cartridge::try_parse_bytes(bytes)
     };
 
     let bios = fs::File::open(args.next().unwrap())?;

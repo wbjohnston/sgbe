@@ -6,15 +6,12 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-//! Switchable work ram trait and implementations
+//! Common frontend functions
 
-mod fixed;
-pub use self::fixed::Fixed;
-
-mod banked;
-pub use self::banked::Banked;
-
-use hardware::Memory;
-
-/// Marker trait to signify memory can be used as switchable work ram
-pub trait SWRAM: Memory {}
+/// Read a rom
+pub fn try_read_rom<'a>(path: &'a str) -> io::Result<&[u8]> {
+    let mut buffer = String::new();
+    let handle = fs::File::open(path)?;
+    handle.read_to_string(&mut buffer)?;
+    Ok(buffer.as_bytes())
+}

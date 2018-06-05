@@ -8,8 +8,8 @@
 
 //! Gameboy CPU register file
 
-use isa::types::{DoubleWord, Word};
-use isa::util::{pack_words, split_doubleword, split_word};
+use isa::{DoubleWord, Word};
+use hardware::{pack_words, split_doubleword, split_word};
 
 /// A Gameboy CPU register file
 #[derive(Debug, Copy, Clone)]

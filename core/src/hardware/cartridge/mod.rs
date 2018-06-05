@@ -6,55 +6,20 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use failure::{Error, Fail};
+mod mbc;
+pub use self::mbc::MBC;
 
-use hardware::mmu::{MBC, SWRAM};
-use hardware::mmu::swram;
-use hardware::mmu::mbc;
-use hardware::MMU;
-use isa::types::Word;
+use isa::{Word, Address};
+use failure::Error;
+use hardware::Memory;
+
+pub type Cartridge = MBC;
 
 #[derive(Fail, Debug, Clone)]
 pub enum CartridgeError {
     #[fail(display = "Failed to parse bytes into a valid catridge")]
     ParsingError
 }
-
-#[derive(Clone)]
-pub struct Cartridge {
-    header: Header,
-}
-
-impl Cartridge {
-    /// Try to create a cartridge from a stream of bytes
-    pub fn try_parse_bytes<'a>(bytes: &'a [u8]) -> Result<Self, Error> {
-        unimplemented!()
-    }
-
-    /// Return a reference to the cartridge header
-    pub fn header(&self) -> &Header {
-        &self.header
-    }
-}
-
-
-// impl Into<MMU<mbc::Fixed, swram::Fixed>> for Cartridge {
-//     fn into(self) -> MMU<mbc::Fixed, swram::Fixed> {
-//         unimplemented!()
-//     }
-// }
-
-// impl<M: MBC, S: SWRAM> Into<MMU<M, S>> for Cartridge {
-//     fn into(self) -> MMU<M, S> {
-//         let x = 10;
-//         if x == 10 {
-//             MMU::<mbc::Fixed, swram::Fixed>::new();
-//         } else {
-//             MMU::<mbc::MBC1, swram::Banked>::new()
-//         }
-//         // unimplemented!()
-//     }
-// }
 
 #[derive(Debug, Clone, Copy)]
 pub enum CartridgeKind {
@@ -133,8 +98,4 @@ pub struct Header {
 
 impl Header {
     const NINTENDO_LOGO_SIZE: usize = 0x30;
-
-    fn try_parse_bytes<'a>(bytes: &'a [u8]) -> Result<Self, Error> {
-        unimplemented!()
-    }
 }

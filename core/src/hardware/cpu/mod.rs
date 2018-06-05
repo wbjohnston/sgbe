@@ -15,13 +15,13 @@
 mod registers;
 use self::registers::Registers;
 
-use isa::disassemble::decode;
-use isa::types::{Address, DoubleWord, Immediate, Immediate16, Word};
-use isa::{Flag, Instruction, Register16, Register8};
+use disasm::decode;
+use isa::{
+    Address, DoubleWord, Flag, Immediate, Immediate16, Instruction, Register16, Register8, Word,
+};
 
+use hardware::mmu::SWRAM;
 use hardware::MMU;
-
-use hardware::mmu::{MBC, SWRAM};
 
 pub const CYCLES_PER_SECOND: usize = 4_194_304;
 
@@ -43,9 +43,13 @@ impl CPU {
         }
     }
 
+    pub fn emulate<S: SWRAM>(&mut self, cycles: usize, mmu: &mut MMU<S>) {
+        unimplemented!()
+    }
+
     /// Execute the current instruction and advance the CPU forward one step, Returns the
     /// number of cycles used
-    pub fn step<M: MBC, S: SWRAM>(&mut self, bus: &mut MMU<M, S>) -> u8 {
+    pub fn step<S: SWRAM>(&mut self, bus: &mut MMU<S>) -> u8 {
         let instruction = decode(self.registers.pc, bus);
         self.registers.pc += instruction.size() as Address;
 
@@ -56,12 +60,10 @@ impl CPU {
     /// Execute an instruction, returning the number of cycles used
     fn execute(&mut self, instr: Instruction) -> u8 {
         use self::Instruction::*;
-        let mut did_branch = false;
-
-        match instr {
-            Nop => {}
+        let did_branch = match instr {
+            Nop => false,
             _ => unimplemented!(),
-        }
+        };
 
         if did_branch {
             instr.cycles_on_branch()

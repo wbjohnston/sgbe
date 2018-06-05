@@ -6,13 +6,10 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-pub mod disassemble;
-
-pub mod types;
+mod types;
+pub use self::types::{Address, DoubleWord, Immediate, Immediate16, SignedImmediate, Word};
 
 pub mod util;
-
-use self::types::{Address, DoubleWord, Immediate, Immediate16, SignedImmediate, Word};
 
 // An 8-bit register
 #[derive(Debug, Copy, Clone)]

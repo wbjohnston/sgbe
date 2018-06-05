@@ -6,9 +6,8 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use super::mmu::{MBC, SWRAM};
+use super::mmu::{SWRAM};
 use super::MMU;
-use traits::Emulator;
 
 /// A Gameboy graphics processing unit
 #[derive(Debug, Clone, Copy)]
@@ -18,14 +17,12 @@ impl GPU {
     pub fn new() -> GPU {
         unimplemented!()
     }
-
-    fn draw<M: MBC, S: SWRAM>(&mut self, mmu: &mut MMU<M, S>) {
+    
+    pub fn emulate<S: SWRAM>(&mut self, cycles: usize, mmu: &mut MMU<S>) {
         unimplemented!()
     }
-}
 
-impl Emulator for GPU {
-    fn emulate(&self, cycles: usize) {
+    fn draw<S: SWRAM>(&mut self, mmu: &mut MMU<S>) {
         unimplemented!()
     }
 }

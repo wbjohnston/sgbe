@@ -6,9 +6,9 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use traits::Memory;
+use hardware::Memory;
 use super::SWRAM;
-use isa::types::{Address, Word};
+use isa::{Address, Word};
 
 /// Banked switchable work ram
 #[derive(Debug, Copy, Clone)]

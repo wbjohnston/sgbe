@@ -6,7 +6,7 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use isa::types::Word;
+use isa::Word;
 
 const KB: usize = 1024;
 

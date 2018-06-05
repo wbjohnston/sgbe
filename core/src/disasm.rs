@@ -8,9 +8,8 @@
 
 //! Functions and structs for disassembling instructions
 
-use super::types::{Address, Immediate, Immediate16, SignedImmediate};
-use super::{Flag, Instruction, Register16, Register8};
-use traits::Memory;
+use isa::*;
+use hardware::Memory;
 
 /// Decode an instruction
 pub fn decode<B: Memory>(address: Address, bus: &B) -> Instruction {
@@ -20,6 +19,7 @@ pub fn decode<B: Memory>(address: Address, bus: &B) -> Instruction {
     use self::Register8::*;
 
     /// Decode a `0xCB` prefixed instruction
+    #[inline(always)]
     fn decode_cb<B: Memory>(address: Address, bus: &B) -> Instruction {
         // TODO: (will) implement
         let encoded = bus.read(address);

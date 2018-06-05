@@ -16,14 +16,12 @@ extern crate smallvec;
 #[macro_use]
 extern crate failure;
 
+pub mod disasm;
+
 pub mod bios;
 
-pub mod cartridge;
-
-mod traits;
-
-mod hardware;
+pub mod hardware;
 
 pub mod system;
 
-mod isa;
+pub mod isa;
