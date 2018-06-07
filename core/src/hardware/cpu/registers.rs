@@ -11,6 +11,7 @@
 use isa::{DoubleWord, Word};
 use hardware::{pack_words, split_doubleword, split_word};
 
+const DEFAULT_IR_VALUE: Word = 0x00;
 const DEFAULT_A_VALUE: Word = 0x01;
 const DEFAULT_F_VALUE: Word = 0xB0;
 const DEFAULT_B_VALUE: Word = 0x00;
@@ -33,6 +34,7 @@ pub struct Registers {
     pub e: Word,
     pub h: Word,
     pub l: Word,
+    pub ir: Word,
     pub sp: DoubleWord,
     pub pc: DoubleWord,
 }
@@ -98,6 +100,7 @@ impl Registers {
 impl Default for Registers {
     fn default() -> Self {
         Registers {
+            ir: DEFAULT_IR_VALUE,
             a: DEFAULT_A_VALUE,
             f: DEFAULT_F_VALUE,
             b: DEFAULT_B_VALUE,

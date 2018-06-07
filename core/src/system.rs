@@ -8,13 +8,13 @@
 
 //! Gameboy systems
 
-use hardware::bios::{CgbBios, GbBios, Bios};
 use enumset::EnumSet;
+use hardware::bios::{Bios, CgbBios, GbBios};
 
 use hardware::cartridge::Cartridge;
 use hardware::cpu::Registers;
+use hardware::memory::{Memory4Kb, Memory8Kb};
 use hardware::mmu::swram::{self, SWRAM};
-use hardware::memory::{Memory8Kb, Memory4Kb};
 use hardware::{APU, CPU, GPU, MMU};
 use isa::Word;
 
@@ -77,11 +77,15 @@ impl<S: SWRAM, B: Bios> System<S, B> {
 
     /// Step the sytem forward on instruction execution
     pub fn step(&mut self) -> u8 {
+        self.mmu.update_input_registers(self.input); // update input state
+
         let cycles_in_step = self.cpu.step(&mut self.mmu);
+
         self.gpu.emulate(cycles_in_step as usize, &mut self.mmu);
         cycles_in_step
     }
 
+    /// Emulate the system taking a specified number of steps
     pub fn emulate(&mut self, cycles: usize) {
         let mut cycles = cycles; // TODO: (will) what happens when we get cycles not a multiple of 4?
         while cycles > 0 {
@@ -89,9 +93,8 @@ impl<S: SWRAM, B: Bios> System<S, B> {
         }
     }
 
-    /// Set the input state the next cycle will read from
-    ///
-    /// Returns input state pass into it
+    /// Set the input state the next cycle will read from, then return the
+    /// input that was passed in
     pub fn set_input(&mut self, buttons: Buttons) -> Buttons {
         self.input = buttons;
         buttons

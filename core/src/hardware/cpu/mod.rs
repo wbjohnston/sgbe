@@ -12,6 +12,7 @@ mod registers;
 pub use self::registers::Registers;
 
 use disasm::decode;
+use hardware::memory::Memory;
 use isa::{
     Address, DoubleWord, Flag, Immediate, Immediate16, Instruction, Register16, Register8, Word,
 };
@@ -42,8 +43,10 @@ impl CPU {
 
     /// Execute the current instruction and advance the CPU forward one step, Returns the
     /// number of cycles used
-    pub fn step<S: SWRAM, B: Bios>(&mut self, memory: &mut MMU<S, B>) -> u8 {
-        let instruction = decode(self.registers.pc, memory);
+    pub fn step<S: SWRAM, B: Bios>(&mut self, mmu: &mut MMU<S, B>) -> u8 {
+        // read in raw value of instruction into ir
+        self.registers.ir = mmu.read(self.registers.pc);
+        let instruction = decode(self.registers.pc, mmu);
         self.registers.pc += instruction.size() as Address;
 
         let cycles_used = self.execute(instruction);
