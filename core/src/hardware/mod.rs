@@ -51,7 +51,6 @@ pub fn split_word(word: Word) -> (Word, Word) {
 
 #[cfg(test)]
 mod test {
-
     use super::*;
 
     #[test]
@@ -76,5 +75,13 @@ mod test {
         let expected = (0xB, 0xA);
         let sampled = split_word(value);
         assert_eq!(expected, sampled);
+    }
+
+    quickcheck! {
+        /// Check that splitting then packing return the same result
+        fn split_then_pack_is_identity(word: DoubleWord) -> bool {
+            let (lo, hi) = split_doubleword(word);
+            word == pack_words(lo, hi)
+        }
     }
 }

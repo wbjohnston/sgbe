@@ -13,7 +13,7 @@ use hardware::bios::{Bios, CgbBios, GbBios};
 
 use hardware::cartridge::Cartridge;
 use hardware::cpu::Registers;
-use hardware::memory::{Memory4Kb, Memory8Kb};
+use hardware::memory::{Memory4Kb, Memory8Kb, Memory};
 use hardware::mmu::swram::{self, SWRAM};
 use hardware::{APU, CPU, GPU, MMU};
 use isa::Word;
@@ -54,10 +54,12 @@ pub struct System<S: SWRAM, B: Bios> {
 impl<S: SWRAM + Default, B: Bios> System<S, B> {
     /// Create a new system with no loaded catridge
     pub fn new(bios: B) -> Self {
+        let mmu = MMU::<S, B>::new(bios);
+        let initial_ir = mmu.read(0);
         System {
             input: Buttons::empty(),
-            cpu: CPU::new(),
-            mmu: MMU::new(bios),
+            cpu: CPU::new_with_ir(initial_ir),
+            mmu: mmu,
             gpu: GPU::new(),
             apu: APU::new(),
         }

@@ -5,6 +5,7 @@ authors = ["Will Johnston <wbjohnston@gmail.com>"]
 
 [dev-dependencies]
 hamcrest = "0.1"
+quickcheck = "0.6"
 
 [dependencies]
 log = "0.4"

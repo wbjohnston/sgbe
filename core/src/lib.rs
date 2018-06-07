@@ -8,6 +8,10 @@
 
 #![cfg_attr(feature = "nightly", feature(test))]
 
+#[cfg(test)]
+#[macro_use]
+extern crate quickcheck;
+
 #[macro_use]
 extern crate log;
 #[macro_use]
