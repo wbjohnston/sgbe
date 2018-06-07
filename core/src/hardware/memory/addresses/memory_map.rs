@@ -14,7 +14,8 @@ pub const BIOS_OFFSET: Address = 0x0000;
 pub const BIOS_END: Address = 0x0100;
 
 /// Rom
-pub const ROM0_OFFSET: Address = 0x0100; /// TODO: gameboy color 
+pub const ROM0_OFFSET: Address = 0x0100;
+/// TODO: gameboy color
 pub const ROM0_END: Address = 0x3FFF;
 
 // Switchable rom

@@ -51,7 +51,6 @@ impl Debug for GbBios {
     }
 }
 
-
 /// A Gameboy color bios
 #[derive(Clone, Copy)]
 pub struct CgbBios(CgbBiosInner);

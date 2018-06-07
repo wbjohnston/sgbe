@@ -49,7 +49,6 @@ pub fn split_word(word: Word) -> (Word, Word) {
     (word & 0x0F, word >> 4)
 }
 
-
 #[cfg(test)]
 mod test {
 
@@ -68,7 +67,6 @@ mod test {
         let (lo, hi): (u8, u8) = (0xAD, 0xDE);
         let expected = 0xDEAD;
         let sampled = pack_words(lo, hi);
-        println!("({:x}, {:x}) -> {:x}", lo, hi, sampled);
         assert_eq!(expected, sampled);
     }
 

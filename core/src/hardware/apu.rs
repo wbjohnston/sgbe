@@ -6,9 +6,9 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use hardware::MMU;
-use hardware::mmu::SWRAM;
 use hardware::bios::Bios;
+use hardware::mmu::SWRAM;
+use hardware::MMU;
 
 #[derive(Debug, Copy, Clone)]
 pub struct APU {}

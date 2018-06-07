@@ -6,9 +6,9 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use super::mmu::{SWRAM};
-use hardware::bios::Bios;
+use super::mmu::SWRAM;
 use super::MMU;
+use hardware::bios::Bios;
 
 /// A Gameboy graphics processing unit
 #[derive(Debug, Clone, Copy)]
@@ -18,7 +18,7 @@ impl GPU {
     pub fn new() -> GPU {
         GPU {}
     }
-    
+
     pub fn emulate<S: SWRAM, B: Bios>(&mut self, cycles: usize, mmu: &mut MMU<S, B>) {
         debug!("GPU not yet implemented")
         // unimplemented!()

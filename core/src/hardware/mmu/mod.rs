@@ -6,17 +6,16 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-
 pub mod swram;
 pub use self::swram::SWRAM;
 
 use system::Buttons;
 
+use hardware::bios::Bios;
 use hardware::memory::addresses::memory_map::*;
 use hardware::memory::Memory;
 use hardware::memory::{Memory16Kb, Memory4Kb, Memory8Kb};
 use hardware::Cartridge;
-use hardware::bios::Bios;
 use isa::{Address, Word};
 
 /// A Gameboy Memory management unit

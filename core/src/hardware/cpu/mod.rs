@@ -71,7 +71,7 @@ impl CPU {
                 self.registers.set_hl(hl + 1);
 
                 instruction.cycles()
-            },
+            }
             v => {
                 unimplemented!("{:?} instruction not implemented", v);
             }

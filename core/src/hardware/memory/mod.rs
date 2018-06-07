@@ -11,7 +11,7 @@
 pub mod addresses;
 
 use hardware::pack_words;
-use isa::{Word, Address, DoubleWord};
+use isa::{Address, DoubleWord, Word};
 
 /// Number of bytes in one Kilobyte
 const KB: usize = 1024;

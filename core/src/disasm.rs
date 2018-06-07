@@ -8,8 +8,8 @@
 
 //! Functions and structs for disassembling instructions
 
-use isa::*;
 use hardware::memory::Memory;
+use isa::*;
 
 /// Decode an instruction
 pub fn decode<M: Memory>(address: Address, memory: &M) -> Instruction {
@@ -158,7 +158,7 @@ pub fn decode<M: Memory>(address: Address, memory: &M) -> Instruction {
                 let imm = memory.read(next_address);
                 assert!(imm < 8);
                 BitIR(imm, H)
-            },
+            }
             0x7D => unimplemented!(),
             0x7E => unimplemented!(),
             0x7F => unimplemented!(),

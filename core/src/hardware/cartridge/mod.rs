@@ -11,10 +11,10 @@ pub use self::mbc::MBC;
 
 pub mod header;
 
+use failure::Error;
 use hardware::memory::Memory;
 use hardware::Timer;
 use isa::{Address, Word};
-use failure::Error;
 
 #[derive(Debug, Clone)]
 pub struct Cartridge {
@@ -44,4 +44,3 @@ pub enum CartridgeError {
     #[fail(display = "Failed to parse bytes into a valid catridge")]
     ParsingError,
 }
-
