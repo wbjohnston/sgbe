@@ -9,10 +9,12 @@
 //! Gameboy systems
 
 use bios::{CgbBios, GbBios, BIOS};
+use enumset::EnumSet;
 
 use hardware::cartridge::Cartridge;
 use hardware::cpu::Registers;
 use hardware::mmu::swram::{self, SWRAM};
+use hardware::memory::{Memory8Kb, Memory4Kb};
 use hardware::{APU, CPU, GPU, MMU};
 use isa::Word;
 
@@ -22,8 +24,27 @@ pub type Gb = System<swram::Fixed, GbBios>;
 /// Gameboy color
 pub type Cgb = System<swram::Banked, CgbBios>;
 
+/// Gameboy Keys state
+pub type Buttons = EnumSet<Key>;
+
+/// State of the Dpad
+// #[derive(Debug, Copy, Clone)]
+enum_set_type! {
+    pub enum Key {
+        A,
+        B,
+        Start,
+        Select,
+        Left,
+        Right,
+        Up,
+        Down,
+    }
+}
+
 /// A Gameboy sytem
 pub struct System<S: SWRAM, B: BIOS> {
+    input: Buttons,
     bios: B,
     cpu: CPU,
     mmu: MMU<S>,
@@ -35,9 +56,10 @@ impl<S: SWRAM + Default, B: BIOS> System<S, B> {
     /// Create a new system with no loaded catridge
     pub fn new(bios: B) -> Self {
         System {
+            input: Buttons::empty(),
             bios: bios,
             cpu: CPU::new(),
-            mmu: MMU::default(),
+            mmu: MMU::new(),
             gpu: GPU::new(),
             apu: APU::new(),
         }
@@ -55,16 +77,6 @@ impl<S: SWRAM, B: BIOS> System<S, B> {
         self.mmu.unload()
     }
 
-    pub fn vram(&self) -> &[Word] {
-        unimplemented!()
-    }
-
-    pub fn registers(&self) -> &Registers {
-        self.cpu.registers()
-    }
-}
-
-impl<S: SWRAM, B: BIOS> System<S, B> {
     /// Step the sytem forward on instruction execution
     pub fn step(&mut self) -> u8 {
         let cycles_in_step = self.cpu.step(&mut self.mmu);
@@ -77,5 +89,22 @@ impl<S: SWRAM, B: BIOS> System<S, B> {
         while cycles > 0 {
             cycles -= self.step() as usize;
         }
+    }
+
+    /// Set the input state the next cycle will read from
+    ///
+    /// Returns input state pass into it
+    pub fn set_input(&mut self, keys: Buttons) -> Buttons {
+        unimplemented!()
+    }
+
+    /// Return the sytem video ram
+    pub fn vram(&self) -> &Memory8Kb {
+        self.mmu.vram()
+    }
+
+    /// Return the registers of the CPU
+    pub fn registers(&self) -> &Registers {
+        self.cpu.registers()
     }
 }

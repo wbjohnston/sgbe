@@ -6,7 +6,7 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-//! Memory addresses for secctions of the memory map
+//! Memory addresses for the memory map
 
 use isa::Address;
 

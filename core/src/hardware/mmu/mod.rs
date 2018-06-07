@@ -6,13 +6,9 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-mod reginfo;
-use self::reginfo::*;
-
-mod meminfo;
-use self::meminfo::*;
 
 pub mod swram;
+use hardware::memory::addresses::memory_map::*;
 pub use self::swram::SWRAM;
 
 use super::memory::Memory;
@@ -31,8 +27,9 @@ pub struct MMU<S: SWRAM> {
     hram: [Word; HRAM_SIZE], // high ram
 }
 
-impl<S: SWRAM + Default> Default for MMU<S> {
-    fn default() -> Self {
+impl<S: SWRAM + Default> MMU<S> {
+    /// Crete a new MMMU with initialized io ram
+    pub fn new() -> Self {
         let oam = [0; OAM_SIZE];
         let iom = Self::new_io_memory();
         let hram = [0; HRAM_SIZE];
@@ -50,6 +47,10 @@ impl<S: SWRAM + Default> Default for MMU<S> {
 }
 
 impl<S: SWRAM> MMU<S> {
+    pub fn vram(&self) -> &Memory8Kb {
+        &self.vram
+    }
+
     /// Load a cartridge into the MMU
     pub fn load(&mut self, cartridge: Cartridge) {
         self.cartridge = Some(cartridge);
@@ -99,9 +100,11 @@ impl<S: SWRAM> MMU<S> {
 
         iom
     }
+}
 
+impl<S: SWRAM> Memory for MMU<S> {
     /// Read a word from memory
-    fn read_inner(&self, address: Address) -> Word {
+    fn read(&self, address: Address) -> Word {
         match address {
             ROM0_OFFSET...ROM0_END => if let Some(ref cartridge) = self.cartridge {
                 cartridge.read(address - ROM0_OFFSET)
@@ -127,7 +130,9 @@ impl<S: SWRAM> MMU<S> {
                 Word::default()
             },
             OAM_OFFSET...OAM_END => self.oam[(address - OAM_OFFSET) as usize],
-            UNUSABLE_MEMORY_OFFSET...UNUSABLE_MEMORY_END => unreachable!(), // its not usable
+            UNUSABLE_MEMORY_OFFSET...UNUSABLE_MEMORY_END => {
+                unreachable!("tried to read unreadable memory")
+            }
             IOM_OFFSET...IOM_END => self.iom[(address - IOM_OFFSET) as usize],
             HRAM_OFFSET...HRAM_END => self.hram[(address - HRAM_OFFSET) as usize],
             v => unreachable!("Tried to read unmmapped value: {}", v),
@@ -135,7 +140,7 @@ impl<S: SWRAM> MMU<S> {
     }
 
     /// Write a `Word` to memory
-    fn write_inner(&mut self, address: Address, value: Word) {
+    fn write(&mut self, address: Address, value: Word) {
         match address {
             ROM0_OFFSET...ROM0_END => if let Some(ref mut cartridge) = self.cartridge {
                 cartridge.write(address - ROM0_OFFSET, value)
@@ -158,15 +163,5 @@ impl<S: SWRAM> MMU<S> {
             HRAM_OFFSET...HRAM_END => self.hram[(address - HRAM_OFFSET) as usize] = value,
             v => unreachable!("Tried to read unmmapped value: {}", v),
         }
-    }
-}
-
-impl<S: SWRAM> Memory for MMU<S> {
-    fn read(&self, address: Address) -> Word {
-        self.read_inner(address)
-    }
-
-    fn write(&mut self, address: Address, value: Word) {
-        self.write_inner(address, value)
     }
 }

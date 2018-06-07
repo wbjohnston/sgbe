@@ -6,10 +6,12 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-//! Memory types
+//! Memory structures and address info
+
+pub mod addresses;
 
 use hardware::pack_words;
-use isa::{Address, DoubleWord, Word};
+use isa::{Word, Address, DoubleWord};
 
 /// Number of bytes in one Kilobyte
 const KB: usize = 1024;

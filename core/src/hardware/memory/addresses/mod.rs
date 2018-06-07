@@ -6,25 +6,8 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-#![cfg_attr(feature = "nightly", feature(test))]
+//! Addresses for things having to do with memory
 
-#[macro_use]
-extern crate log;
-#[macro_use]
-extern crate smallvec;
+pub mod memory_map;
 
-#[macro_use]
-extern crate failure;
-
-#[macro_use]
-extern crate enumset;
-
-pub mod disasm;
-
-pub mod bios;
-
-pub mod hardware;
-
-pub mod system;
-
-pub mod isa;
+pub mod registers;

@@ -28,3 +28,4 @@ assert_cli = "0.6"
 failure = "0.1"
 log = "0.4"
 core = { path= "./core" }
+enumset = "0.3"
