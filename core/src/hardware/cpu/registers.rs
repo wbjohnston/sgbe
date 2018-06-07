@@ -8,8 +8,10 @@
 
 //! Gameboy CPU register file
 
-use isa::{DoubleWord, Word};
+use std::fmt;
+
 use hardware::{pack_words, split_doubleword, split_word};
+use isa::{DoubleWord, Word};
 
 const DEFAULT_IR_VALUE: Word = 0x00;
 const DEFAULT_A_VALUE: Word = 0x01;
@@ -76,6 +78,10 @@ impl Registers {
         pack_words(self.h, self.l)
     }
 
+    fn af(&self) -> DoubleWord {
+        pack_words(self.a, self.f)
+    }
+
     /// Return the value of the `ZERO` flag
     pub fn zf_is_set(&self) -> bool {
         (self.f & 0b0001_0000) != 0
@@ -115,6 +121,38 @@ impl Default for Registers {
     }
 }
 
+impl fmt::Display for Registers {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(
+            f,
+            r#"
+            A: {} F: {} AF: {}
+            B: {} C: {} BC: {}
+            D: {} E: {} DE: {}
+            H: {} L: {} HL: {}
+            SP: {}
+            PC: {}
+            IR: {}
+            "#,
+            self.a,
+            self.f,
+            self.af(),
+            self.b,
+            self.c,
+            self.bc(),
+            self.d,
+            self.e,
+            self.de(),
+            self.h,
+            self.l,
+            self.hl(),
+            self.sp,
+            self.pc,
+            self.ir,
+        )
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::*;
@@ -125,18 +163,17 @@ mod test {
         registers.set_hl(0xFFA0);
 
         assert_eq!(registers.hl(), 0xFFA0);
-        assert_eq!(registers.h, 0xFF);
-        assert_eq!(registers.l, 0xA0);
+        assert_eq!(registers.h, 0xA0);
+        assert_eq!(registers.l, 0xFF);
 
         registers.set_bc(0xABCD);
         assert_eq!(registers.bc(), 0xABCD);
-        assert_eq!(registers.b, 0xAB);
-        assert_eq!(registers.c, 0xCD);
+        assert_eq!(registers.b, 0xCD);
+        assert_eq!(registers.c, 0xAB);
 
-        registers.set_hl(0xDEED);
-        assert_eq!(registers.de(), 0xDEED);
-        assert_eq!(registers.d, 0xDE);
-        assert_eq!(registers.e, 0xED);
+        registers.set_de(0xDEAD);
+        assert_eq!(registers.de(), 0xDEAD);
+        assert_eq!(registers.d, 0xAD);
+        assert_eq!(registers.e, 0xDE);
     }
 }
-

@@ -21,6 +21,7 @@ pub fn decode<M: Memory>(address: Address, memory: &M) -> Instruction {
     /// Decode a `0xCB` prefixed instruction
     #[inline(always)]
     fn decode_cb<B: Memory>(address: Address, memory: &B) -> Instruction {
+        let next_address = address + 1;
         match memory.read(address) {
             0x00 => RlcR(B),
             0x01 => RlcR(C),
@@ -153,7 +154,11 @@ pub fn decode<M: Memory>(address: Address, memory: &M) -> Instruction {
             0x79 => unimplemented!(),
             0x7A => unimplemented!(),
             0x7B => unimplemented!(),
-            0x7C => unimplemented!(),
+            0x7C => {
+                let imm = memory.read(next_address);
+                assert!(imm < 8);
+                BitIR(imm, H)
+            },
             0x7D => unimplemented!(),
             0x7E => unimplemented!(),
             0x7F => unimplemented!(),
@@ -335,7 +340,7 @@ pub fn decode<M: Memory>(address: Address, memory: &M) -> Instruction {
 
         0x20 => JrCondS(Nf, memory.read(next_address) as SignedImmediate),
         0x21 => LdRrIi(HL, memory.read(next_address) as Immediate16),
-        0x22 => unimplemented!(), // TODO: (will) implement
+        0x22 => LdiHlA,
         0x23 => IncHl,
         0x24 => IncR(H),
         0x25 => DecR(H),
@@ -343,7 +348,7 @@ pub fn decode<M: Memory>(address: Address, memory: &M) -> Instruction {
         0x27 => Daa,
         0x28 => JrCondS(Zf, memory.read(next_address) as SignedImmediate),
         0x29 => AddHlRr(DE),
-        0x2A => unimplemented!(), // TODO: (will) implement
+        0x2A => LdiAHl,
         0x2B => DecRr(HL),
         0x2C => IncR(L),
         0x2D => DecR(L),
@@ -352,7 +357,7 @@ pub fn decode<M: Memory>(address: Address, memory: &M) -> Instruction {
 
         0x30 => JrCondS(Cf, memory.read(next_address) as SignedImmediate),
         0x31 => LdRrIi(SP, memory.read_double(next_address) as Immediate16),
-        0x32 => unimplemented!(), // TODO: (will) implement
+        0x32 => LddHlA, // TODO: (will) implement
         0x33 => IncRr(SP),
         0x34 => IncHl,
         0x35 => DecHl,
@@ -360,7 +365,7 @@ pub fn decode<M: Memory>(address: Address, memory: &M) -> Instruction {
         0x37 => Scf,
         0x38 => JrCondS(Cf, memory.read(next_address) as SignedImmediate),
         0x39 => IncR(A),
-        0x3A => unimplemented!(), // TODO: (will) implement
+        0x3A => LddAHl, // TODO: (will) implement
         0x3B => DecRr(SP),
         0x3C => IncR(A),
         0x3D => DecR(A),
@@ -547,7 +552,7 @@ pub fn decode<M: Memory>(address: Address, memory: &M) -> Instruction {
         0xE7 => Rst(memory.read(next_address) as Immediate),
         0xE8 => AddSpS(memory.read(next_address) as SignedImmediate),
         0xE9 => JpHl,
-        0xEA => unimplemented!(), // TODO: (will) implement
+        0xEA => LdIiA, // TODO: (will) implement
         v @ 0xEB => Undefined(v),
         v @ 0xEC => Undefined(v),
         v @ 0xED => Undefined(v),

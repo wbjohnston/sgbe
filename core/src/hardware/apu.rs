@@ -6,11 +6,19 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+use hardware::MMU;
+use hardware::mmu::SWRAM;
+use hardware::bios::Bios;
+
 #[derive(Debug, Copy, Clone)]
 pub struct APU {}
 
 impl APU {
     pub fn new() -> Self {
         APU {}
+    }
+
+    pub fn emulate<S: SWRAM, B: Bios>(&mut self, mmu: &mut MMU<S, B>, cycles: usize) {
+        unimplemented!()
     }
 }

@@ -7,7 +7,7 @@
 // except according to those terms.
 
 extern crate core;
-use core::bios::{GbBios, BIOS};
+use core::hardware::bios::{GbBios, Bios};
 use core::hardware::Cartridge;
 use core::system::Gb;
 
@@ -53,32 +53,39 @@ fn main() -> Result<(), Error> {
     let bios = GbBios::from(*include_bytes!("../roms/gb_bios.bin"));
     let mut emulator = Gb::new(bios);
 
-    // let mut input = String::new();
-    let input = "step\n".to_string();
-    let len = input.len();
+    // let input = "step\n".to_string();
+    let mut input = String::new();
+    let mut last_command = String::new();
+
+    // let len = input.len();
     let stdout = io::stdout();
-    // let mut stdin = BufReader::new(io::stdin());
+    let mut stdin = BufReader::new(io::stdin());
     loop {
         let mut out_handle = stdout.lock();
         out_handle.write(PS1.as_bytes())?;
         out_handle.flush()?;
 
-        // let len = stdin.read_line(&mut input)?;
+        let len = stdin.read_line(&mut input)?;
+
+        match len {
+            0 => break, // Not using stdin
+            1 => input = last_command.clone(),
+            v => last_command = input.clone(),
+        }
 
         match parse_command(&input[0..len - 1]) {
             Command::Help => print_help(),
             Command::Step => {
                 emulator.step();
             }
-            Command::ShowRegisters => println!("{:?}", emulator.registers()),
+            Command::ShowRegisters => println!("{}", emulator.registers()),
             Command::Undefined => {
                 out_handle.write(b"Undefined command\n")?;
             }
             Command::Exit => break,
         }
 
-        // input.clear();
-        break;
+        input.clear();
     }
 
     Ok(())

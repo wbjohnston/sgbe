@@ -68,6 +68,7 @@ pub enum Instruction {
     LdIA(Immediate),
     LdAIo(Immediate),
     LdIoA(Immediate),
+    LdIiA,
     LdAIoc,
     LdIocA,
 
@@ -234,6 +235,7 @@ impl Instruction {
             LdIA(_) => 16,
             LdAIo(_) => 12,
             LdIoA(_) => 12,
+            LdIiA => 16,
             LdAIoc => 8,
             LdIocA => 8,
 
@@ -423,6 +425,7 @@ impl Instruction {
             LdIA(_) => 1,
             LdAIo(_) => 1,
             LdIoA(_) => 1,
+            LdIiA => 3,
             LdAIoc => 2,
             LdIocA => 2,
 

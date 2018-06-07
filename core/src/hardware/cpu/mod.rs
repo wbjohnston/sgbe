@@ -49,7 +49,7 @@ impl CPU {
         let instruction = decode(self.registers.pc, mmu);
         self.registers.pc += instruction.size() as Address;
 
-        let cycles_used = self.execute(instruction);
+        let cycles_used = self.execute(instruction, mmu);
         cycles_used
     }
 
@@ -59,17 +59,50 @@ impl CPU {
     }
 
     /// Execute an instruction, returning the number of cycles used
-    fn execute(&mut self, instr: Instruction) -> u8 {
+    fn execute<S: SWRAM, B: Bios>(&mut self, instruction: Instruction, mmu: &mut MMU<S, B>) -> u8 {
         use self::Instruction::*;
-        let did_branch = match instr {
-            Nop => false,
-            v => unimplemented!("{:?} instruction not implemented", v),
-        };
+        match instruction {
+            i @ Nop => i.cycles(),
+            LdRrIi(..) => self.execute_LdRrIi(instruction),
+            XorAR(..) => self.execute_XorAR(instruction),
+            LddHlA => {
+                self.registers.a = mmu.read(self.registers.hl());
+                let hl = self.registers.hl();
+                self.registers.set_hl(hl + 1);
 
-        if did_branch {
-            instr.cycles_on_branch()
-        } else {
-            instr.cycles()
+                instruction.cycles()
+            },
+            v => {
+                unimplemented!("{:?} instruction not implemented", v);
+            }
         }
+    }
+
+    fn execute_LdRrIi(&mut self, instruction: Instruction) -> u8 {
+        use self::Instruction::LdRrIi;
+        use self::Register16::*;
+
+        match instruction {
+            LdRrIi(SP, imm) => self.registers.sp = imm,
+            LdRrIi(HL, imm) => self.registers.set_hl(imm),
+            LdRrIi(..) => unimplemented!("{:?} instruction not implemented", instruction),
+            _ => unreachable!(),
+        }
+
+        instruction.cycles()
+    }
+
+    fn execute_XorAR(&mut self, instruction: Instruction) -> u8 {
+        use self::Instruction::XorAR;
+        use self::Register8::*;
+
+        match instruction {
+            XorAR(A) => self.registers.a = 0,
+            XorAR(H) => self.registers.h = 0,
+            XorAR(..) => unimplemented!("{:?} instruction not implemented", instruction),
+            _ => unreachable!(),
+        }
+
+        instruction.cycles()
     }
 }

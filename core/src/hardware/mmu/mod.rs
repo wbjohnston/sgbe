@@ -67,7 +67,7 @@ impl<S: SWRAM, B: Bios> MMU<S, B> {
     }
 
     pub fn update_input_registers(&mut self, input: Buttons) {
-        unimplemented!()
+        debug!("input not yet implemented")
     }
 
     /// Create a new IO memory section for the gameboy
