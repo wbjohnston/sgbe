@@ -14,15 +14,15 @@ use hardware::{pack_words, split_doubleword, split_word};
 use isa::{DoubleWord, Word};
 
 const DEFAULT_IR_VALUE: Word = 0x00;
-const DEFAULT_A_VALUE: Word = 0x01;
-const DEFAULT_F_VALUE: Word = 0xB0;
+const DEFAULT_A_VALUE: Word = 0x00;
+const DEFAULT_F_VALUE: Word = 0x00;
 const DEFAULT_B_VALUE: Word = 0x00;
-const DEFAULT_C_VALUE: Word = 0x13;
+const DEFAULT_C_VALUE: Word = 0x00;
 const DEFAULT_D_VALUE: Word = 0x00;
-const DEFAULT_E_VALUE: Word = 0xD8;
-const DEFAULT_H_VALUE: Word = 0x01;
-const DEFAULT_L_VALUE: Word = 0x4D;
-const DEFAULT_SP_VALUE: DoubleWord = 0xFFFE; // FIXME: not the right value
+const DEFAULT_E_VALUE: Word = 0x00;
+const DEFAULT_H_VALUE: Word = 0x00;
+const DEFAULT_L_VALUE: Word = 0x00;
+const DEFAULT_SP_VALUE: DoubleWord = 0x0000; // FIXME: not the right value
 const DEFAULT_PC_VALUE: DoubleWord = 0x0000;
 
 /// A Gameboy CPU register file
@@ -45,37 +45,37 @@ impl Registers {
     /// Set the value of the `HL` register
     pub fn set_bc(&mut self, value: DoubleWord) {
         let (lo, hi) = split_doubleword(value);
-        self.b = lo;
-        self.c = hi;
+        self.b = hi;
+        self.c = lo;
     }
 
     /// Return the value in the `BC` register
     pub fn bc(&self) -> DoubleWord {
-        pack_words(self.b, self.c)
+        pack_words(self.c, self.b)
     }
 
-    /// Set the value of the `HL` register
+    /// Set the value of the `DE` register
     pub fn set_de(&mut self, value: DoubleWord) {
         let (lo, hi) = split_doubleword(value);
-        self.d = lo;
-        self.e = hi;
+        self.d = hi;
+        self.e = lo;
     }
 
     /// Return the value in the `DE` register
     pub fn de(&self) -> DoubleWord {
-        pack_words(self.d, self.e)
+        pack_words(self.e, self.d)
     }
 
     /// Set the value of the `HL` register
     pub fn set_hl(&mut self, value: DoubleWord) {
         let (lo, hi) = split_doubleword(value);
-        self.h = lo;
-        self.l = hi;
+        self.h = hi;
+        self.l = lo;
     }
 
     /// Return the value in the `HL` register
     pub fn hl(&self) -> DoubleWord {
-        pack_words(self.h, self.l)
+        pack_words(self.l, self.h)
     }
 
     fn af(&self) -> DoubleWord {
@@ -163,17 +163,17 @@ mod test {
         registers.set_hl(0xFFA0);
 
         assert_eq!(registers.hl(), 0xFFA0);
-        assert_eq!(registers.h, 0xA0);
-        assert_eq!(registers.l, 0xFF);
+        assert_eq!(registers.h, 0xFF);
+        assert_eq!(registers.l, 0xA0);
 
         registers.set_bc(0xABCD);
         assert_eq!(registers.bc(), 0xABCD);
-        assert_eq!(registers.b, 0xCD);
-        assert_eq!(registers.c, 0xAB);
+        assert_eq!(registers.b, 0xAB);
+        assert_eq!(registers.c, 0xCD);
 
         registers.set_de(0xDEAD);
         assert_eq!(registers.de(), 0xDEAD);
-        assert_eq!(registers.d, 0xAD);
-        assert_eq!(registers.e, 0xDE);
+        assert_eq!(registers.d, 0xDE);
+        assert_eq!(registers.e, 0xAD);
     }
 }

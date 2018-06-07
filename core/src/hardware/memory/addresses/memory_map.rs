@@ -44,7 +44,7 @@ pub const ECHO_RAM_END: Address = 0xFDFF;
 /// Object attribute memory (OAM) addresses
 pub const OAM_OFFSET: Address = 0xFE00;
 pub const OAM_END: Address = 0xFE9F;
-pub const OAM_SIZE: usize = (OAM_END - OAM_OFFSET) as usize;
+pub const OAM_SIZE: usize = (OAM_END - OAM_OFFSET + 1) as usize;
 
 pub const UNUSABLE_MEMORY_OFFSET: Address = 0xFEA0;
 pub const UNUSABLE_MEMORY_END: Address = 0xFEFF;
@@ -52,9 +52,9 @@ pub const UNUSABLE_MEMORY_END: Address = 0xFEFF;
 // IO memory addresses
 pub const IOM_OFFSET: Address = 0xFF00;
 pub const IOM_END: Address = 0xFF7F;
-pub const IOM_SIZE: usize = (IOM_END - IOM_OFFSET) as usize;
+pub const IOM_SIZE: usize = (IOM_END - IOM_OFFSET + 1) as usize;
 
 // High ram addresses
 pub const HRAM_OFFSET: Address = 0xFF80;
 pub const HRAM_END: Address = 0x0FFFF;
-pub const HRAM_SIZE: usize = (HRAM_END - HRAM_OFFSET) as usize;
+pub const HRAM_SIZE: usize = (HRAM_END - HRAM_OFFSET + 1) as usize;

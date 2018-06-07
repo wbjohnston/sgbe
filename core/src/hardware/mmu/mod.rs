@@ -151,6 +151,7 @@ impl<S: SWRAM, B: Bios> Memory for MMU<S, B> {
     /// Write a `Word` to memory
     fn write(&mut self, address: Address, value: Word) {
         match address {
+            BIOS_OFFSET...BIOS_END => self.bios.write(address, value),
             ROM0_OFFSET...ROM0_END => if let Some(ref mut cartridge) = self.cartridge {
                 cartridge.write(address - ROM0_OFFSET, value)
             },
@@ -170,7 +171,7 @@ impl<S: SWRAM, B: Bios> Memory for MMU<S, B> {
             UNUSABLE_MEMORY_OFFSET...UNUSABLE_MEMORY_END => unreachable!(), // its not usable
             IOM_OFFSET...IOM_END => self.iom[(address - IOM_OFFSET) as usize] = value,
             HRAM_OFFSET...HRAM_END => self.hram[(address - HRAM_OFFSET) as usize] = value,
-            v => unreachable!("Tried to read unmmapped value: {}", v),
+            v => unreachable!("Tried to read unmmapped value: {:x}", v),
         }
     }
 }

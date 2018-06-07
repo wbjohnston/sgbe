@@ -53,17 +53,17 @@ fn parse_command(command: &str) -> Command {
     }
 }
 
-fn print_memory<M: Memory>(memory: &M, address: Address, margin: usize) {
+fn print_memory<M: Memory>(memory: &M, base: Address, margin: usize) {
     for addr in (0x00..0xFF_u8)
         .cycle()
-        .skip((address) as usize)
+        .skip((base) as usize)
         .take((margin * 2 + 1) as usize)
     {
         let addr = addr as Address;
-        if addr == address {
-            println!("[{:4x}] : {}", addr, memory.read(addr))
+        if addr == base {
+            println!("[{:4x}] : {:x}", addr, memory.read(addr))
         } else {
-            println!(" {:4x} : {}", addr, memory.read(addr))
+            println!(" {:4x} : {:x}", addr, memory.read(addr))
         }
     }
 }

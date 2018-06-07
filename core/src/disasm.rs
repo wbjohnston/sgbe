@@ -154,11 +154,7 @@ pub fn decode<M: Memory>(memory: &M, address: Address) -> Instruction {
             0x79 => unimplemented!(),
             0x7A => unimplemented!(),
             0x7B => unimplemented!(),
-            0x7C => {
-                let imm = memory.read(next_address);
-                assert!(imm < 8);
-                BitIR(imm, H)
-            }
+            0x7C => BitIR(7, H),
             0x7D => unimplemented!(),
             0x7E => unimplemented!(),
             0x7F => unimplemented!(),

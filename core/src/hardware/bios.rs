@@ -33,7 +33,7 @@ impl Memory for GbBios {
     }
 
     fn write(&mut self, address: Address, value: Word) {
-        unimplemented!()
+        self.0[address as usize] = value;
     }
 }
 
