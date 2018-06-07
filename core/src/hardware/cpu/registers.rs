@@ -126,13 +126,13 @@ impl fmt::Display for Registers {
         write!(
             f,
             r#"
-            A: {} F: {} AF: {}
-            B: {} C: {} BC: {}
-            D: {} E: {} DE: {}
-            H: {} L: {} HL: {}
-            SP: {}
-            PC: {}
-            IR: {}
+            A: {:4x} F: {:4x} AF: {:8x}
+            B: {:4x} C: {:4x} BC: {:8x}
+            D: {:4x} E: {:4x} DE: {:8x}
+            H: {:4x} L: {:4x} HL: {:8x}
+            SP: {:4x}
+            PC: {:4x}
+            IR: {:4x}
             "#,
             self.a,
             self.f,
