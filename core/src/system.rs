@@ -25,12 +25,12 @@ pub type Gb = System<swram::Fixed, GbBios>;
 pub type Cgb = System<swram::Banked, CgbBios>;
 
 /// Gameboy Keys state
-pub type Buttons = EnumSet<Key>;
+pub type Buttons = EnumSet<Button>;
 
 /// State of the Dpad
 // #[derive(Debug, Copy, Clone)]
 enum_set_type! {
-    pub enum Key {
+    pub enum Button {
         A,
         B,
         Start,
@@ -92,8 +92,14 @@ impl<S: SWRAM, B: Bios> System<S, B> {
     /// Set the input state the next cycle will read from
     ///
     /// Returns input state pass into it
-    pub fn set_input(&mut self, keys: Buttons) -> Buttons {
-        unimplemented!()
+    pub fn set_input(&mut self, buttons: Buttons) -> Buttons {
+        self.input = buttons;
+        buttons
+    }
+
+    /// Return current input state
+    pub fn input(&self) -> Buttons {
+        self.input
     }
 
     /// Return the sytem video ram

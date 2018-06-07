@@ -10,6 +10,8 @@
 pub mod swram;
 pub use self::swram::SWRAM;
 
+use system::Buttons;
+
 use hardware::memory::addresses::memory_map::*;
 use hardware::memory::Memory;
 use hardware::memory::{Memory16Kb, Memory4Kb, Memory8Kb};
@@ -62,6 +64,10 @@ impl<S: SWRAM, B: Bios> MMU<S, B> {
     /// Unload the current catridge from the MMU
     pub fn unload(&mut self) {
         self.cartridge = None;
+    }
+
+    pub fn update_input_registers(&mut self, input: Buttons) {
+        unimplemented!()
     }
 
     /// Create a new IO memory section for the gameboy
