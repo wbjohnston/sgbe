@@ -7,8 +7,11 @@
 // except according to those terms.
 
 extern crate core;
-use core::hardware::bios::{GbBios, Bios};
+use core::disasm::decode;
+use core::hardware::bios::{Bios, GbBios};
+use core::hardware::memory::Memory;
 use core::hardware::Cartridge;
+use core::isa::Address;
 use core::system::Gb;
 
 #[macro_use]
@@ -23,39 +26,58 @@ use std::io::{self, BufRead, BufReader, Read, Write};
 
 const PS1: &'static str = "gbdb> ";
 
-fn print_help() {
-    println!(r#"TODO: write help message"#);
-}
-
-fn parse_command<'a>(command: &'a str) -> Command {
-    match command {
-        "help" => Command::Help,
-        "step" => Command::Step,
-        "show reg" => Command::ShowRegisters,
-        "exit" => Command::Exit,
-        _ => Command::Undefined,
-    }
-}
-
 #[derive(Debug, Copy, Clone)]
 enum Command {
     Help,
     ShowRegisters,
+    ShowMemory,
+    ShowInstruction,
     Step,
     Exit,
     Undefined,
 }
 
-fn main() -> Result<(), Error> {
-    let bios_path = "./roms/bios.gb";
-    let rom_path = "./roms/tetris.gb";
+fn print_help() {
+    println!(r#"TODO: write help message"#);
+}
 
+fn parse_command(command: &str) -> Command {
+    match command {
+        "h" | "help" => Command::Help,
+        "s" | "step" => Command::Step,
+        "r" | "show reg" => Command::ShowRegisters,
+        "m" | "show mem" => Command::ShowMemory,
+        "i" | "show instruction" => Command::ShowInstruction,
+        "x" | "exit" => Command::Exit,
+        _ => Command::Undefined,
+    }
+}
+
+fn print_memory<M: Memory>(memory: &M, address: Address, margin: usize) {
+    for addr in (0x00..0xFF_u8)
+        .cycle()
+        .skip((address) as usize)
+        .take((margin * 2 + 1) as usize)
+    {
+        let addr = addr as Address;
+        if addr == address {
+            println!("[{:4x}] : {}", addr, memory.read(addr))
+        } else {
+            println!(" {:4x} : {}", addr, memory.read(addr))
+        }
+    }
+}
+
+fn print_instruction<M: Memory>(memory: &M, address: Address) {
+    println!("{:?}", decode(memory, address));
+}
+
+fn main() -> Result<(), Error> {
     let bios = GbBios::from(*include_bytes!("../roms/gb_bios.bin"));
     let mut emulator = Gb::new(bios);
 
     // let input = "step\n".to_string();
     let mut input = String::new();
-    let mut last_command = String::new();
 
     // let len = input.len();
     let stdout = io::stdout();
@@ -66,12 +88,7 @@ fn main() -> Result<(), Error> {
         out_handle.flush()?;
 
         let len = stdin.read_line(&mut input)?;
-
-        match len {
-            0 => break, // Not using stdin
-            1 => input = last_command.clone(),
-            v => last_command = input.clone(),
-        }
+        let mut last_pc = emulator.pc();
 
         match parse_command(&input[0..len - 1]) {
             Command::Help => print_help(),
@@ -79,6 +96,8 @@ fn main() -> Result<(), Error> {
                 emulator.step();
             }
             Command::ShowRegisters => println!("{}", emulator.registers()),
+            Command::ShowMemory => print_memory(emulator.mmu(), emulator.pc(), 5),
+            Command::ShowInstruction => print_instruction(emulator.mmu(), last_pc),
             Command::Undefined => {
                 out_handle.write(b"Undefined command\n")?;
             }

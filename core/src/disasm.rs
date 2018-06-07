@@ -12,7 +12,7 @@ use hardware::memory::Memory;
 use isa::*;
 
 /// Decode an instruction
-pub fn decode<M: Memory>(address: Address, memory: &M) -> Instruction {
+pub fn decode<M: Memory>(memory: &M, address: Address) -> Instruction {
     use self::Flag::*;
     use self::Instruction::*;
     use self::Register16::*;

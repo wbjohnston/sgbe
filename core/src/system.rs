@@ -13,10 +13,10 @@ use hardware::bios::{Bios, CgbBios, GbBios};
 
 use hardware::cartridge::Cartridge;
 use hardware::cpu::Registers;
-use hardware::memory::{Memory4Kb, Memory8Kb, Memory};
+use hardware::memory::{Memory, Memory4Kb, Memory8Kb};
 use hardware::mmu::swram::{self, SWRAM};
 use hardware::{APU, CPU, GPU, MMU};
-use isa::Word;
+use isa::{Address, Word};
 
 /// Gameboy
 pub type Gb = System<swram::Fixed, GbBios>;
@@ -115,5 +115,13 @@ impl<S: SWRAM, B: Bios> System<S, B> {
     /// Return the registers of the CPU
     pub fn registers(&self) -> &Registers {
         self.cpu.registers()
+    }
+
+    pub fn pc(&self) -> Address {
+        self.cpu.registers().pc
+    }
+
+    pub fn mmu(&self) -> &MMU<S, B> {
+        &self.mmu
     }
 }

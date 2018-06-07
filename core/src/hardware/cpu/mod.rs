@@ -54,9 +54,10 @@ impl CPU {
     /// Execute the current instruction and advance the CPU forward one step, Returns the
     /// number of cycles used
     pub fn step<S: SWRAM, B: Bios>(&mut self, mmu: &mut MMU<S, B>) -> u8 {
-        // read in raw value of instruction into ir
+        // FIXME: make sure the ir is loaded with correct value on init
         self.registers.ir = mmu.read(self.registers.pc);
-        let instruction = decode(self.registers.pc, mmu);
+        // read in raw value of instruction into ir
+        let instruction = decode(mmu, self.registers.pc);
         self.registers.pc += instruction.size() as Address;
 
         let cycles_used = self.execute(instruction, mmu);
