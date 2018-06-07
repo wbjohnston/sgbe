@@ -21,8 +21,6 @@ extern crate enumset;
 
 pub mod disasm;
 
-pub mod bios;
-
 pub mod hardware;
 
 pub mod system;

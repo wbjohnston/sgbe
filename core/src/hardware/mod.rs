@@ -10,6 +10,8 @@
 
 use isa::{DoubleWord, Word};
 
+pub mod bios;
+
 pub mod memory;
 
 pub mod cartridge;

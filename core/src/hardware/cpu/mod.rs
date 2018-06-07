@@ -16,6 +16,7 @@ use isa::{
     Address, DoubleWord, Flag, Immediate, Immediate16, Instruction, Register16, Register8, Word,
 };
 
+use hardware::bios::Bios;
 use hardware::mmu::SWRAM;
 use hardware::MMU;
 
@@ -41,7 +42,7 @@ impl CPU {
 
     /// Execute the current instruction and advance the CPU forward one step, Returns the
     /// number of cycles used
-    pub fn step<S: SWRAM>(&mut self, memory: &mut MMU<S>) -> u8 {
+    pub fn step<S: SWRAM, B: Bios>(&mut self, memory: &mut MMU<S, B>) -> u8 {
         let instruction = decode(self.registers.pc, memory);
         self.registers.pc += instruction.size() as Address;
 

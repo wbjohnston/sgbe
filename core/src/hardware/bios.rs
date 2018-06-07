@@ -20,7 +20,7 @@ type GbBiosInner = [Word; GB_BIOS_SIZE];
 type CgbBiosInner = [Word; CGB_BIOS_SIZE];
 
 /// A Gameboy bios
-pub trait BIOS: Memory {}
+pub trait Bios: Memory {}
 
 /// A Gameboy bios
 #[derive(Clone, Copy)]
@@ -37,7 +37,7 @@ impl Memory for GbBios {
     }
 }
 
-impl BIOS for GbBios {}
+impl Bios for GbBios {}
 
 impl From<GbBiosInner> for GbBios {
     fn from(bytes: GbBiosInner) -> Self {
@@ -67,7 +67,7 @@ impl Memory for CgbBios {
     }
 }
 
-impl BIOS for CgbBios {}
+impl Bios for CgbBios {}
 
 impl From<CgbBiosInner> for CgbBios {
     fn from(bytes: CgbBiosInner) -> Self {

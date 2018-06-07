@@ -8,16 +8,18 @@
 
 
 pub mod swram;
-use hardware::memory::addresses::memory_map::*;
 pub use self::swram::SWRAM;
 
-use super::memory::Memory;
-use super::memory::{Memory16Kb, Memory4Kb, Memory8Kb};
-use super::Cartridge;
+use hardware::memory::addresses::memory_map::*;
+use hardware::memory::Memory;
+use hardware::memory::{Memory16Kb, Memory4Kb, Memory8Kb};
+use hardware::Cartridge;
+use hardware::bios::Bios;
 use isa::{Address, Word};
 
 /// A Gameboy Memory management unit
-pub struct MMU<S: SWRAM> {
+pub struct MMU<S: SWRAM, B: Bios> {
+    bios: B,
     cartridge: Option<Cartridge>,
     vram: Memory8Kb,         // video ram
     wram: Memory4Kb,         // work ram
@@ -27,14 +29,15 @@ pub struct MMU<S: SWRAM> {
     hram: [Word; HRAM_SIZE], // high ram
 }
 
-impl<S: SWRAM + Default> MMU<S> {
+impl<S: SWRAM + Default, B: Bios> MMU<S, B> {
     /// Crete a new MMMU with initialized io ram
-    pub fn new() -> Self {
+    pub fn new(bios: B) -> Self {
         let oam = [0; OAM_SIZE];
         let iom = Self::new_io_memory();
         let hram = [0; HRAM_SIZE];
 
         Self {
+            bios: bios,
             cartridge: None,
             vram: Memory8Kb::new(),
             wram: Memory4Kb::new(),
@@ -46,7 +49,7 @@ impl<S: SWRAM + Default> MMU<S> {
     }
 }
 
-impl<S: SWRAM> MMU<S> {
+impl<S: SWRAM, B: Bios> MMU<S, B> {
     pub fn vram(&self) -> &Memory8Kb {
         &self.vram
     }
@@ -102,10 +105,11 @@ impl<S: SWRAM> MMU<S> {
     }
 }
 
-impl<S: SWRAM> Memory for MMU<S> {
+impl<S: SWRAM, B: Bios> Memory for MMU<S, B> {
     /// Read a word from memory
     fn read(&self, address: Address) -> Word {
         match address {
+            BIOS_OFFSET...BIOS_END => self.bios.read(address - BIOS_OFFSET),
             ROM0_OFFSET...ROM0_END => if let Some(ref cartridge) = self.cartridge {
                 cartridge.read(address - ROM0_OFFSET)
             } else {

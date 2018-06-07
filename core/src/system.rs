@@ -8,7 +8,7 @@
 
 //! Gameboy systems
 
-use bios::{CgbBios, GbBios, BIOS};
+use hardware::bios::{CgbBios, GbBios, Bios};
 use enumset::EnumSet;
 
 use hardware::cartridge::Cartridge;
@@ -43,30 +43,28 @@ enum_set_type! {
 }
 
 /// A Gameboy sytem
-pub struct System<S: SWRAM, B: BIOS> {
+pub struct System<S: SWRAM, B: Bios> {
     input: Buttons,
-    bios: B,
     cpu: CPU,
-    mmu: MMU<S>,
+    mmu: MMU<S, B>,
     gpu: GPU,
     apu: APU,
 }
 
-impl<S: SWRAM + Default, B: BIOS> System<S, B> {
+impl<S: SWRAM + Default, B: Bios> System<S, B> {
     /// Create a new system with no loaded catridge
     pub fn new(bios: B) -> Self {
         System {
             input: Buttons::empty(),
-            bios: bios,
             cpu: CPU::new(),
-            mmu: MMU::new(),
+            mmu: MMU::new(bios),
             gpu: GPU::new(),
             apu: APU::new(),
         }
     }
 }
 
-impl<S: SWRAM, B: BIOS> System<S, B> {
+impl<S: SWRAM, B: Bios> System<S, B> {
     /// Load a catridge into the system
     pub fn load(&mut self, cartridge: Cartridge) {
         self.mmu.load(cartridge)

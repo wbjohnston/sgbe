@@ -7,6 +7,7 @@
 // except according to those terms.
 
 use super::mmu::{SWRAM};
+use hardware::bios::Bios;
 use super::MMU;
 
 /// A Gameboy graphics processing unit
@@ -18,7 +19,7 @@ impl GPU {
         GPU {}
     }
     
-    pub fn emulate<S: SWRAM>(&mut self, cycles: usize, mmu: &mut MMU<S>) {
+    pub fn emulate<S: SWRAM, B: Bios>(&mut self, cycles: usize, mmu: &mut MMU<S, B>) {
         debug!("GPU not yet implemented")
         // unimplemented!()
     }
