@@ -9,18 +9,41 @@
 mod mbc;
 pub use self::mbc::MBC;
 
-use isa::{Word, Address};
+use hardware::memory::Memory;
+use hardware::Timer;
+use isa::{Address, Word};
 use failure::Error;
-use hardware::Memory;
 
-pub type Cartridge = MBC;
+#[derive(Debug, Clone)]
+pub struct Cartridge {
+    mbc: MBC,
+    has_battery: bool,
+    timer: Option<Timer>,
+}
+
+impl Cartridge {
+    pub fn try_parse_bytes(bytes: &[u8]) -> Result<Self, Error> {
+        unimplemented!()
+    }
+}
+
+impl Memory for Cartridge {
+    fn read(&self, address: Address) -> Word {
+        unimplemented!()
+    }
+
+    fn write(&mut self, address: Address, value: Word) {
+        unimplemented!()
+    }
+}
 
 #[derive(Fail, Debug, Clone)]
 pub enum CartridgeError {
     #[fail(display = "Failed to parse bytes into a valid catridge")]
-    ParsingError
+    ParsingError,
 }
 
+/// Types of cartridges
 #[derive(Debug, Clone, Copy)]
 pub enum CartridgeKind {
     RomOnly,
@@ -44,7 +67,7 @@ pub enum CartridgeKind {
     MBC5RamBattery,
     MBC5Rumble,
     MBC5RumbleRam,
-    MBC5RumbleRameBattery,
+    MBC5RumbleRamBattery,
     MBC6,
     MBC7SensorRumbleRamBattery,
     PocketCamera,
@@ -53,49 +76,120 @@ pub enum CartridgeKind {
     HuC1RamBattery,
 }
 
+impl From<Word> for CartridgeKind {
+    fn from(value: Word) -> Self {
+        use self::CartridgeKind::*;
+        match value {
+            0x00 => RomOnly,
+            0x01 => MBC1,
+            0x02 => MBC1Ram,
+            0x03 => MBC1RamBattery,
+            0x05 => MBC2,
+            0x06 => MBC2Battery,
+            0x08 => RomRam,
+            0x09 => RomRamBattery,
+            0x0B => MMM01,
+            0x0C => MMM01Ram,
+            0x0D => MMM01RamBattery,
+            0x0F => MBC3TimerBatery,
+            0x10 => MBC3TimerRamBattery,
+            0x11 => MBC3,
+            0x12 => MBC3Ram,
+            0x13 => MBC3RamBattery,
+            0x19 => MBC5,
+            0x1A => MBC5Ram,
+            0x1B => MBC5RamBattery,
+            0x1C => MBC5Rumble,
+            0x1D => MBC5RumbleRam,
+            0x1E => MBC5RumbleRamBattery,
+            0x20 => MBC7SensorRumbleRamBattery,
+            0xFC => PocketCamera,
+            0xFD => BandaiTama5,
+            0xFE => HuC3,
+            0xFF => HuC1RamBattery,
+            _ => unimplemented!(),
+        }
+    }
+}
+
+/// Size of catrdige Rom
 #[derive(Debug, Clone, Copy)]
 pub enum RomSize {
-    KB32,
-    KB64,
-    KB128,
-    KB256,
-    KB512,
-    MB1,
-    MB2,
-    MB4,
-    MB8,
-    MB1_1,
-    MB1_2,
-    MB1_5,
+    Kb32,
+    Kb64,
+    Kb128,
+    Kb256,
+    Kb512,
+    Mb1,
+    Mb2,
+    Mb4,
+    Mb8,
+    Mb1_1,
+    Mb1_2,
+    Mb1_5,
 }
 
+impl From<Word> for RomSize {
+    fn from(value: Word) -> Self {
+        use self::RomSize::*;
+        match value {
+            0x00 => Kb32,
+            0x01 => Kb64,
+            0x02 => Kb128,
+            0x03 => Kb256,
+            0x04 => Kb512,
+            0x05 => Mb1,
+            0x06 => Mb2,
+            0x07 => Mb4,
+            0x08 => Mb8,
+            0x52 => Mb1_1,
+            0x53 => Mb1_2,
+            0x54 => Mb1_5,
+            _ => unimplemented!(),
+        }
+    }
+}
+
+/// Catrdige RAM size
 #[derive(Debug, Clone, Copy)]
-pub enum ERAMSize {
+pub enum RamSize {
     None,
-    KB2,
-    KB8,
-    KB32,
-    KB128,
-    KB64,
+    Kb2,
+    Kb8,
+    Kb32,
+    Kb128,
+    Kb64,
 }
 
+impl From<Word> for RamSize {
+    fn from(value: Word) -> Self {
+        use self::RamSize::*;
+        match value {
+            0x00 => RamSize::None,
+            0x01 => Kb2,
+            0x02 => Kb8,
+            0x03 => Kb32,
+            0x04 => Kb128,
+            0x05 => Kb64,
+            _ => unimplemented!(),
+        }
+    }
+}
+
+/// Catrdige destination locale
 #[derive(Debug, Clone, Copy)]
 pub enum Destination {
     Japan,
     NotJapan,
 }
 
-#[derive(Clone)]
-pub struct Header {
-    logo: [Word; Header::NINTENDO_LOGO_SIZE],
-    kind: CartridgeKind,
-    rom_size: RomSize,
-    eram_size: ERAMSize,
-    destination: Destination,
-    header_checksum: u8,
-    global_checksum: u16,
-}
-
-impl Header {
-    const NINTENDO_LOGO_SIZE: usize = 0x30;
+impl From<Word> for Destination {
+    fn from(value: Word) -> Self {
+        use self::Destination::*;
+        match value {
+            0x00 => Japan,
+            0x01 => NotJapan,
+            _ => unimplemented!(),
+        }
+    }
 }

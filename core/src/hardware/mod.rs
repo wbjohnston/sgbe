@@ -8,7 +8,9 @@
 
 //! Gameboy hardware components
 
-use isa::{Address, Word, DoubleWord};
+use isa::{DoubleWord, Word};
+
+pub mod memory;
 
 pub mod cartridge;
 pub use self::cartridge::Cartridge;
@@ -25,9 +27,14 @@ pub use self::mmu::MMU;
 pub mod apu;
 pub use self::apu::APU;
 
+pub mod timer;
+pub use self::timer::Timer;
+
+// pub mod memory;
+
 /// Return a double word composed from two [`Word`]s
 pub fn pack_words(lo: Word, hi: Word) -> DoubleWord {
-    (lo as DoubleWord) & ((hi as DoubleWord) << 8)
+    (lo as DoubleWord) & ((hi as DoubleWord) >> 8)
 }
 
 /// Return two [`Word`]s in a tuple of the form `(lo, hi)`
@@ -40,21 +47,4 @@ pub fn split_word(word: Word) -> (Word, Word) {
     let lo = word & 0xF0;
     let hi = (word & 0x0F) << 4;
     (lo, hi)
-}
-
-/// A bus to read and write data
-pub trait Memory {
-    /// Read a value from an address
-    fn read(&self, address: Address) -> Word;
-
-    /// Read a `DoubleWord`
-    fn read_double(&self, address: Address) -> DoubleWord {
-        let lo = self.read(address);
-        let hi = self.read(address + 1);
-
-        pack_words(lo, hi)
-    }
-
-    /// Write a value to an address
-    fn write(&mut self, address: Address, value: Word);
 }

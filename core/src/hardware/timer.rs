@@ -6,15 +6,13 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-//! Switchable work ram trait and implementations
+//! A gameboy timer
 
-mod fixed;
-pub use self::fixed::Fixed;
+#[derive(Debug, Copy, Clone)]
+pub struct Timer;
 
-mod banked;
-pub use self::banked::Banked;
-
-use hardware::Memory;
-
-/// Marker trait to signify memory can be used as switchable work ram
-pub trait SWRAM: Memory {}
+impl Timer {
+    pub fn emulate(&mut self, cycles: usize) {
+        unimplemented!()
+    }
+}

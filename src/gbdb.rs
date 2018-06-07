@@ -7,9 +7,9 @@
 // except according to those terms.
 
 extern crate core;
-use core::system::GB;
-use core::cartridge::Cartridge;
-use core::bios::SystemBIOS;
+use core::bios::{GbBios, BIOS};
+use core::hardware::Cartridge;
+use core::system::Gb;
 
 #[macro_use]
 extern crate failure;
@@ -18,8 +18,8 @@ extern crate common;
 use common::try_read_rom;
 
 use failure::Error;
-use std::io::{self, Write, Read, BufRead, BufReader};
 use std::fs;
+use std::io::{self, BufRead, BufReader, Read, Write};
 
 const PS1: &'static str = "gbdb> ";
 
@@ -28,7 +28,13 @@ fn print_help() {
 }
 
 fn parse_command<'a>(command: &'a str) -> Command {
-    unimplemented!()
+    match command {
+        "help" => Command::Help,
+        "step" => Command::Step,
+        "show reg" => Command::ShowRegisters,
+        "exit" => Command::Exit,
+        _ => Command::Undefined,
+    }
 }
 
 #[derive(Debug, Copy, Clone)]
@@ -36,33 +42,43 @@ enum Command {
     Help,
     ShowRegisters,
     Step,
+    Exit,
+    Undefined,
 }
 
 fn main() -> Result<(), Error> {
     let bios_path = "./roms/bios.gb";
     let rom_path = "./roms/tetris.gb";
 
-    let bios = SystemBIOS::from(try_read_rom(bios_path)?);
-    let cartridge = Cartridge::try_parse_bytes(try_read_rom(rom_path)?)?;
+    let bios = GbBios::from(*include_bytes!("../roms/gb_bios.bin"));
+    let mut emulator = Gb::new(bios);
 
-    let mut emulator = GB::new(bios, cartridge);
-
-    let mut input = String::new();
+    // let mut input = String::new();
+    let input = "step\n".to_string();
+    let len = input.len();
     let stdout = io::stdout();
-    let mut stdin = BufReader::new(io::stdin());
+    // let mut stdin = BufReader::new(io::stdin());
     loop {
         let mut out_handle = stdout.lock();
         out_handle.write(PS1.as_bytes())?;
         out_handle.flush()?;
 
-        let len = stdin.read_line(&mut input)?;
+        // let len = stdin.read_line(&mut input)?;
 
         match parse_command(&input[0..len - 1]) {
             Command::Help => print_help(),
-            Command::Step => {emulator.step(); },
-            Command::ShowRegisters => println!("TODO"),
-            _ => unimplemented!()
+            Command::Step => {
+                emulator.step();
+            }
+            Command::ShowRegisters => println!("{:?}", emulator.registers()),
+            Command::Undefined => {
+                out_handle.write(b"Undefined command\n")?;
+            }
+            Command::Exit => break,
         }
+
+        // input.clear();
+        break;
     }
 
     Ok(())

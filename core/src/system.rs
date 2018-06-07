@@ -8,37 +8,43 @@
 
 //! Gameboy systems
 
-use bios::SystemBIOS;
+use bios::{CgbBios, GbBios, BIOS};
 
 use hardware::cartridge::Cartridge;
+use hardware::cpu::Registers;
 use hardware::mmu::swram::{self, SWRAM};
 use hardware::{APU, CPU, GPU, MMU};
+use isa::Word;
 
 /// Gameboy
-pub type GB = System<swram::Fixed>;
+pub type Gb = System<swram::Fixed, GbBios>;
 
 /// Gameboy color
-pub type CGB = System<swram::Banked>;
+pub type Cgb = System<swram::Banked, CgbBios>;
 
 /// A Gameboy sytem
-pub struct System<S: SWRAM> {
-    bios: SystemBIOS,
+pub struct System<S: SWRAM, B: BIOS> {
+    bios: B,
     cpu: CPU,
     mmu: MMU<S>,
     gpu: GPU,
+    apu: APU,
 }
 
-impl<S: SWRAM> System<S> {
+impl<S: SWRAM + Default, B: BIOS> System<S, B> {
     /// Create a new system with no loaded catridge
-    pub fn new(bios: SystemBIOS) -> Self {
+    pub fn new(bios: B) -> Self {
         System {
             bios: bios,
             cpu: CPU::new(),
-            mmu: MMU::new(),
+            mmu: MMU::default(),
             gpu: GPU::new(),
+            apu: APU::new(),
         }
     }
+}
 
+impl<S: SWRAM, B: BIOS> System<S, B> {
     /// Load a catridge into the system
     pub fn load(&mut self, cartridge: Cartridge) {
         self.mmu.load(cartridge)
@@ -48,16 +54,28 @@ impl<S: SWRAM> System<S> {
     pub fn unload(&mut self) {
         self.mmu.unload()
     }
-}
 
-impl<S: SWRAM> System<S> {
-    pub fn step(&mut self) -> u8 {
+    pub fn vram(&self) -> &[Word] {
         unimplemented!()
     }
 
+    pub fn registers(&self) -> &Registers {
+        self.cpu.registers()
+    }
+}
+
+impl<S: SWRAM, B: BIOS> System<S, B> {
+    /// Step the sytem forward on instruction execution
+    pub fn step(&mut self) -> u8 {
+        let cycles_in_step = self.cpu.step(&mut self.mmu);
+        self.gpu.emulate(cycles_in_step as usize, &mut self.mmu);
+        cycles_in_step
+    }
+
     pub fn emulate(&mut self, cycles: usize) {
-        // FIXME: (will) this probably isn't right
-        self.cpu.emulate(cycles, &mut self.mmu);
-        self.gpu.emulate(cycles, &mut self.mmu);
+        let mut cycles = cycles; // TODO: (will) what happens when we get cycles not a multiple of 4?
+        while cycles > 0 {
+            cycles -= self.step() as usize;
+        }
     }
 }

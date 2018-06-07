@@ -8,12 +8,8 @@
 
 //! Gameboy CPU
 
-// NOTE: (will) both the gb cpu and x86_64 arch are little endian
-// TODO: (will) implement all functions for big-endian platforms
-// TODO: (will) implement gameboy color register file
-
 mod registers;
-use self::registers::Registers;
+pub use self::registers::Registers;
 
 use disasm::decode;
 use isa::{
@@ -39,22 +35,23 @@ impl CPU {
             // interrupt master enable
             ime: false,
             is_halted: false,
-            registers: Registers::new(),
+            registers: Registers::default(),
         }
-    }
-
-    pub fn emulate<S: SWRAM>(&mut self, cycles: usize, mmu: &mut MMU<S>) {
-        unimplemented!()
     }
 
     /// Execute the current instruction and advance the CPU forward one step, Returns the
     /// number of cycles used
-    pub fn step<S: SWRAM>(&mut self, bus: &mut MMU<S>) -> u8 {
-        let instruction = decode(self.registers.pc, bus);
+    pub fn step<S: SWRAM>(&mut self, memory: &mut MMU<S>) -> u8 {
+        let instruction = decode(self.registers.pc, memory);
         self.registers.pc += instruction.size() as Address;
 
         let cycles_used = self.execute(instruction);
         cycles_used
+    }
+
+    /// Return a reference to the CPU's registers
+    pub fn registers(&self) -> &Registers {
+        &self.registers
     }
 
     /// Execute an instruction, returning the number of cycles used
@@ -62,7 +59,7 @@ impl CPU {
         use self::Instruction::*;
         let did_branch = match instr {
             Nop => false,
-            _ => unimplemented!(),
+            v => unimplemented!("{:?} instruction not implemented", v),
         };
 
         if did_branch {

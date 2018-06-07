@@ -15,14 +15,11 @@ pub struct GPU;
 
 impl GPU {
     pub fn new() -> GPU {
-        unimplemented!()
+        GPU {}
     }
     
     pub fn emulate<S: SWRAM>(&mut self, cycles: usize, mmu: &mut MMU<S>) {
-        unimplemented!()
-    }
-
-    fn draw<S: SWRAM>(&mut self, mmu: &mut MMU<S>) {
-        unimplemented!()
+        debug!("GPU not yet implemented")
+        // unimplemented!()
     }
 }

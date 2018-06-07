@@ -9,4 +9,8 @@
 #[derive(Debug, Copy, Clone)]
 pub struct APU {}
 
-impl APU {}
+impl APU {
+    pub fn new() -> Self {
+        APU {}
+    }
+}

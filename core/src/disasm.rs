@@ -9,10 +9,10 @@
 //! Functions and structs for disassembling instructions
 
 use isa::*;
-use hardware::Memory;
+use hardware::memory::Memory;
 
 /// Decode an instruction
-pub fn decode<B: Memory>(address: Address, bus: &B) -> Instruction {
+pub fn decode<M: Memory>(address: Address, memory: &M) -> Instruction {
     use self::Flag::*;
     use self::Instruction::*;
     use self::Register16::*;
@@ -20,11 +20,8 @@ pub fn decode<B: Memory>(address: Address, bus: &B) -> Instruction {
 
     /// Decode a `0xCB` prefixed instruction
     #[inline(always)]
-    fn decode_cb<B: Memory>(address: Address, bus: &B) -> Instruction {
-        // TODO: (will) implement
-        let encoded = bus.read(address);
-
-        match encoded {
+    fn decode_cb<B: Memory>(address: Address, memory: &B) -> Instruction {
+        match memory.read(address) {
             0x00 => RlcR(B),
             0x01 => RlcR(C),
             0x02 => RlcR(D),
@@ -300,75 +297,74 @@ pub fn decode<B: Memory>(address: Address, bus: &B) -> Instruction {
         }
     }
 
-    let encoded = bus.read(address);
     let next_address = address + 1;
-    match encoded {
+    match memory.read(address) {
         0x00 => Nop,
-        0x01 => LdRrIi(BC, bus.read_double(next_address) as Immediate16),
+        0x01 => LdRrIi(BC, memory.read_double(next_address) as Immediate16),
         0x02 => LdRrA(BC),
         0x03 => IncRr(BC),
         0x04 => IncR(B),
         0x05 => DecR(B),
-        0x06 => LdRI(B, bus.read(next_address) as Immediate),
+        0x06 => LdRI(B, memory.read(next_address) as Immediate),
         0x07 => Rlca,
-        0x08 => LdIiSp(bus.read_double(next_address) as Immediate16),
+        0x08 => LdIiSp(memory.read_double(next_address) as Immediate16),
         0x09 => AddHlRr(BC),
         0x0A => LdARr(BC),
         0x0B => DecRr(BC),
         0x0C => IncR(C),
         0x0D => DecR(C),
-        0x0E => LdRI(C, bus.read(next_address) as Immediate),
+        0x0E => LdRI(C, memory.read(next_address) as Immediate),
         0x0F => Rrca,
 
         0x10 => Stop,
-        0x11 => LdRrIi(DE, bus.read_double(next_address) as Immediate16),
+        0x11 => LdRrIi(DE, memory.read_double(next_address) as Immediate16),
         0x12 => LdRrA(DE),
         0x13 => IncRr(DE),
         0x14 => IncR(D),
         0x15 => DecR(D),
-        0x16 => LdRI(D, bus.read(next_address) as Immediate),
+        0x16 => LdRI(D, memory.read(next_address) as Immediate),
         0x17 => Rla,
-        0x18 => JrS(bus.read(next_address) as SignedImmediate),
+        0x18 => JrS(memory.read(next_address) as SignedImmediate),
         0x19 => AddHlRr(DE),
         0x1A => LdARr(BC),
         0x1B => DecRr(DE),
         0x1C => IncR(E),
         0x1D => DecR(E),
-        0x1E => LdRI(E, bus.read(next_address) as Immediate),
+        0x1E => LdRI(E, memory.read(next_address) as Immediate),
         0x1F => Rra,
 
-        0x20 => JrCondS(Nf, bus.read(next_address) as SignedImmediate),
-        0x21 => LdRrIi(HL, bus.read(next_address) as Immediate16),
+        0x20 => JrCondS(Nf, memory.read(next_address) as SignedImmediate),
+        0x21 => LdRrIi(HL, memory.read(next_address) as Immediate16),
         0x22 => unimplemented!(), // TODO: (will) implement
         0x23 => IncHl,
         0x24 => IncR(H),
         0x25 => DecR(H),
-        0x26 => LdRI(H, bus.read(next_address) as Immediate),
+        0x26 => LdRI(H, memory.read(next_address) as Immediate),
         0x27 => Daa,
-        0x28 => JrCondS(Zf, bus.read(next_address) as SignedImmediate),
+        0x28 => JrCondS(Zf, memory.read(next_address) as SignedImmediate),
         0x29 => AddHlRr(DE),
         0x2A => unimplemented!(), // TODO: (will) implement
         0x2B => DecRr(HL),
         0x2C => IncR(L),
         0x2D => DecR(L),
-        0x2E => LdRI(L, bus.read(next_address) as Immediate),
+        0x2E => LdRI(L, memory.read(next_address) as Immediate),
         0x2F => Cpl,
 
-        0x30 => JrCondS(Cf, bus.read(next_address) as SignedImmediate),
-        0x31 => LdRrIi(SP, bus.read_double(next_address) as Immediate16),
+        0x30 => JrCondS(Cf, memory.read(next_address) as SignedImmediate),
+        0x31 => LdRrIi(SP, memory.read_double(next_address) as Immediate16),
         0x32 => unimplemented!(), // TODO: (will) implement
         0x33 => IncRr(SP),
         0x34 => IncHl,
         0x35 => DecHl,
-        0x36 => LdHlI(bus.read(next_address) as Immediate),
+        0x36 => LdHlI(memory.read(next_address) as Immediate),
         0x37 => Scf,
-        0x38 => JrCondS(Cf, bus.read(next_address) as SignedImmediate),
+        0x38 => JrCondS(Cf, memory.read(next_address) as SignedImmediate),
         0x39 => IncR(A),
         0x3A => unimplemented!(), // TODO: (will) implement
         0x3B => DecRr(SP),
         0x3C => IncR(A),
         0x3D => DecR(A),
-        0x3E => LdAI(bus.read(next_address) as Immediate),
+        0x3E => LdAI(memory.read(next_address) as Immediate),
         0x3F => Ccf,
 
         0x40 => LdRR(B, B),
@@ -509,71 +505,71 @@ pub fn decode<B: Memory>(address: Address, bus: &B) -> Instruction {
 
         0xC0 => RetCond(Cf),
         0xC1 => Pop(BC),
-        0xC2 => JpCondIi(Zf, bus.read_double(next_address) as Address),
-        0xC3 => JpIi(bus.read_double(next_address) as Address),
-        0xC4 => CallCondIi(Zf, bus.read_double(next_address) as Address),
+        0xC2 => JpCondIi(Zf, memory.read_double(next_address) as Address),
+        0xC3 => JpIi(memory.read_double(next_address) as Address),
+        0xC4 => CallCondIi(Zf, memory.read_double(next_address) as Address),
         0xC5 => Push(BC),
-        0xC6 => AddAI(bus.read(next_address) as Immediate),
-        0xC7 => Rst(bus.read(next_address) as Immediate),
+        0xC6 => AddAI(memory.read(next_address) as Immediate),
+        0xC7 => Rst(memory.read(next_address) as Immediate),
         0xC8 => RetCond(Zf),
         0xC9 => Ret,
-        0xCA => JpCondIi(Zf, bus.read_double(next_address) as Address),
-        0xCB => decode_cb(next_address, bus),
-        0xCC => CallCondIi(Zf, bus.read_double(next_address) as Address),
-        0xCD => CallIi(bus.read_double(next_address) as Address),
-        0xCE => AdcAI(bus.read(next_address) as Immediate),
-        0xCF => Rst(bus.read(next_address) as Immediate),
+        0xCA => JpCondIi(Zf, memory.read_double(next_address) as Address),
+        0xCB => decode_cb(next_address, memory),
+        0xCC => CallCondIi(Zf, memory.read_double(next_address) as Address),
+        0xCD => CallIi(memory.read_double(next_address) as Address),
+        0xCE => AdcAI(memory.read(next_address) as Immediate),
+        0xCF => Rst(memory.read(next_address) as Immediate),
 
         0xD0 => RetCond(Cf),
         0xD1 => Pop(DE),
-        0xD2 => JpCondIi(Zf, bus.read_double(next_address) as Address),
+        0xD2 => JpCondIi(Zf, memory.read_double(next_address) as Address),
         v @ 0xD3 => Undefined(v),
-        0xD4 => CallCondIi(Zf, bus.read_double(next_address) as Address),
+        0xD4 => CallCondIi(Zf, memory.read_double(next_address) as Address),
         0xD5 => Push(DE),
-        0xD6 => SubAI(bus.read(next_address) as Immediate),
-        0xD7 => Rst(bus.read(next_address) as Immediate),
+        0xD6 => SubAI(memory.read(next_address) as Immediate),
+        0xD7 => Rst(memory.read(next_address) as Immediate),
         0xD8 => RetCond(Cf),
         0xD9 => Reti,
-        0xDA => JpCondIi(Cf, bus.read_double(next_address) as Address),
+        0xDA => JpCondIi(Cf, memory.read_double(next_address) as Address),
         v @ 0xDB => Undefined(v),
-        0xDC => CallCondIi(Cf, bus.read_double(next_address) as Address),
+        0xDC => CallCondIi(Cf, memory.read_double(next_address) as Address),
         v @ 0xDD => Undefined(v),
-        0xDE => SbcAI(bus.read(next_address) as Immediate),
-        0xDF => Rst(bus.read(next_address) as Immediate),
+        0xDE => SbcAI(memory.read(next_address) as Immediate),
+        0xDF => Rst(memory.read(next_address) as Immediate),
 
-        0xE0 => LdIoA(bus.read(next_address) as Immediate),
+        0xE0 => LdIoA(memory.read(next_address) as Immediate),
         0xE1 => Pop(HL),
         0xE2 => LdIocA,
         v @ 0xE3 => Undefined(v),
         v @ 0xE4 => Undefined(v),
         0xE5 => Push(HL),
-        0xE6 => AndAI(bus.read(next_address) as Immediate),
-        0xE7 => Rst(bus.read(next_address) as Immediate),
-        0xE8 => AddSpS(bus.read(next_address) as SignedImmediate),
+        0xE6 => AndAI(memory.read(next_address) as Immediate),
+        0xE7 => Rst(memory.read(next_address) as Immediate),
+        0xE8 => AddSpS(memory.read(next_address) as SignedImmediate),
         0xE9 => JpHl,
         0xEA => unimplemented!(), // TODO: (will) implement
         v @ 0xEB => Undefined(v),
         v @ 0xEC => Undefined(v),
         v @ 0xED => Undefined(v),
-        0xEE => XorAI(bus.read(next_address) as Immediate),
-        0xEF => Rst(bus.read(next_address) as Immediate),
+        0xEE => XorAI(memory.read(next_address) as Immediate),
+        0xEF => Rst(memory.read(next_address) as Immediate),
 
-        0xF0 => LdAIo(bus.read(next_address) as Immediate),
+        0xF0 => LdAIo(memory.read(next_address) as Immediate),
         0xF1 => Pop(AF),
         0xF2 => LdAIoc,
         0xF3 => Di,
         v @ 0xF4 => Undefined(v),
         0xF5 => Push(AF),
-        0xF6 => OrAI(bus.read(next_address) as Immediate),
-        0xF7 => Rst(bus.read(next_address) as Immediate),
-        0xF8 => LdHlSp(bus.read(next_address) as SignedImmediate),
+        0xF6 => OrAI(memory.read(next_address) as Immediate),
+        0xF7 => Rst(memory.read(next_address) as Immediate),
+        0xF8 => LdHlSp(memory.read(next_address) as SignedImmediate),
         0xF9 => LdSpHl,
         0xFA => unimplemented!(), // TODO: implement me
         0xFB => Ei,
         v @ 0xFC => Undefined(v),
         v @ 0xFD => Undefined(v),
-        0xFE => CpAI(bus.read(next_address) as Immediate),
-        0xFF => Rst(bus.read(next_address) as Immediate),
+        0xFE => CpAI(memory.read(next_address) as Immediate),
+        0xFF => Rst(memory.read(next_address) as Immediate),
         _ => unreachable!(),
     }
 }

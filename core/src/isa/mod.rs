@@ -9,8 +9,6 @@
 mod types;
 pub use self::types::{Address, DoubleWord, Immediate, Immediate16, SignedImmediate, Word};
 
-pub mod util;
-
 // An 8-bit register
 #[derive(Debug, Copy, Clone)]
 pub enum Register8 {

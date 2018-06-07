@@ -10,8 +10,8 @@
 extern crate failure;
 extern crate core;
 
-use core::cartridge::Cartridge;
-use core::system::{CGB, GB};
+use core::system::{Cgb, Gb};
+use core::hardware::Cartridge;
 use failure::Error;
 use std::env;
 use std::fs;
