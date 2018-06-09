@@ -20,8 +20,8 @@ pub use self::cartridge::Cartridge;
 pub mod cpu;
 pub use self::cpu::CPU;
 
-pub mod gpu;
-pub use self::gpu::GPU;
+pub mod ppu;
+pub use self::ppu::PPU;
 
 pub mod mmu;
 pub use self::mmu::MMU;

@@ -17,10 +17,6 @@ use isa::{
     Address, DoubleWord, Flag, Immediate, Immediate16, Instruction, Register16, Register8, Word,
 };
 
-use hardware::bios::Bios;
-use hardware::mmu::SWRAM;
-use hardware::MMU;
-
 pub const CYCLES_PER_SECOND: usize = 4_194_304;
 
 /// A Gameboy central processing unit
@@ -71,6 +67,7 @@ impl CPU {
     /// Execute an instruction, returning the number of cycles used
     fn execute<M: Memory>(&mut self, instruction: Instruction, memory: &mut M) -> u8 {
         use self::Instruction::*;
+        use self::Register16::*;
         match instruction {
             i @ Nop => i.cycles(),
             LdRrIi(..) => self.execute_LdRrIi(instruction),
@@ -86,9 +83,9 @@ impl CPU {
             LdIocA => self.execute_LdIocA(instruction, memory),
             Di => self.execute_Di(instruction, memory),
             LddHlA => {
-                self.registers.a = memory.read(self.registers.hl());
-                let hl = self.registers.hl();
-                self.registers.set_hl(hl + 1);
+                self.registers.a = memory.read(self.registers.read16(HL));
+                let hl = self.registers.read16(HL);
+                self.registers.write16(HL, hl + 1);
 
                 instruction.cycles()
             }
@@ -101,10 +98,11 @@ impl CPU {
     #[allow(non_snake_case)]
     fn execute_LdHlR<M: Memory>(&mut self, instruction: Instruction, memory: &mut M) -> u8 {
         use self::Instruction::LdHlR;
+        use self::Register16::HL;
         use self::Register8::*;
         match instruction {
-            LdHlR(A) => memory.write(self.registers.hl(), self.registers.a),
-            _ => unimplemented!()
+            LdHlR(A) => memory.write(self.registers.read16(HL), self.registers.a),
+            _ => unimplemented!(),
         }
         instruction.cycles()
     }
@@ -149,10 +147,9 @@ impl CPU {
 
     #[allow(non_snake_case)]
     fn exectue_JrCondS(&mut self, instruction: Instruction) -> u8 {
-        use self::Flag::*;
         use self::Instruction::JrCondS;
         match instruction {
-            JrCondS(Nf, v) => if self.registers.nf_is_set() {
+            JrCondS(flag, v) => if self.registers.read_flag(flag) {
                 self.registers.pc = if v < 0 {
                     self.registers.pc - (-v) as Address
                 } else {
@@ -186,10 +183,7 @@ impl CPU {
         use self::Register16::*;
 
         match instruction {
-            LdRrIi(BC, imm) => self.registers.set_bc(imm),
-            LdRrIi(DE, imm) => self.registers.set_de(imm),
-            LdRrIi(HL, imm) => self.registers.set_hl(imm),
-            LdRrIi(SP, imm) => self.registers.sp = imm,
+            LdRrIi(reg, imm) => self.registers.write16(reg, imm),
             LdRrIi(..) => unimplemented!("{:?} instruction not implemented", instruction),
             _ => unreachable!(),
         }

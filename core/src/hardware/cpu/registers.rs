@@ -11,7 +11,12 @@
 use std::fmt;
 
 use hardware::{pack_words, split_doubleword, split_word};
-use isa::{DoubleWord, Word};
+use isa::{DoubleWord, Flag, Register16, Register8, Word};
+
+const ZF_FLAG_BIT_N: usize = 0;
+const NF_FLAG_BIT_N: usize = 0;
+const HF_FLAG_BIT_N: usize = 0;
+const CF_FLAG_BIT_N: usize = 0;
 
 const DEFAULT_IR_VALUE: Word = 0x00;
 const DEFAULT_A_VALUE: Word = 0x00;
@@ -22,8 +27,10 @@ const DEFAULT_D_VALUE: Word = 0x00;
 const DEFAULT_E_VALUE: Word = 0x00;
 const DEFAULT_H_VALUE: Word = 0x00;
 const DEFAULT_L_VALUE: Word = 0x00;
-const DEFAULT_SP_VALUE: DoubleWord = 0x0000; // FIXME: not the right value
+const DEFAULT_SP_VALUE: DoubleWord = 0x0000;
 const DEFAULT_PC_VALUE: DoubleWord = 0x0000;
+
+// TODO: (will) implement flag register as bitflags
 
 /// A Gameboy CPU register file
 #[derive(Debug, Copy, Clone)]
@@ -42,64 +49,111 @@ pub struct Registers {
 }
 
 impl Registers {
-    /// Set the value of the `HL` register
-    pub fn set_bc(&mut self, value: DoubleWord) {
+    // TODO: (will) rename to `read_register8`
+    /// Return the value in an 8-bit register
+    pub fn read8(&self, register: Register8) -> Word {
+        use self::Register8::*;
+        match register {
+            A => self.a,
+            F => self.f,
+            B => self.b,
+            C => self.c,
+            D => self.d,
+            E => self.e,
+            H => self.h,
+            L => self.l,
+        }
+    }
+
+    // TODO: (will) rename to `write_register8`
+    /// Set the value in an 8-bit register
+    pub fn write8(&mut self, register: Register8, value: Word) {
+        use self::Register8::*;
+        match register {
+            A => self.a = value,
+            F => self.f = value,
+            B => self.b = value,
+            C => self.c = value,
+            D => self.d = value,
+            E => self.e = value,
+            H => self.h = value,
+            L => self.l = value,
+        }
+    }
+
+    // TODO: (will) rename to `read_register16`
+    /// Get the value in an 16-bit register
+    pub fn read16(&self, register: Register16) -> DoubleWord {
+        use self::Register16::*;
+        use self::Register8::*;
+        match register {
+            AF => pack_words(self.read8(F), self.read8(A)),
+            BC => pack_words(self.read8(C), self.read8(B)),
+            DE => pack_words(self.read8(E), self.read8(D)),
+            HL => pack_words(self.read8(L), self.read8(H)),
+            SP => self.sp,
+            PC => self.pc,
+        }
+    }
+
+    // TODO: (will) rename to `write_register16`
+    /// Set the value in an 16-bit register
+    pub fn write16(&mut self, register: Register16, value: DoubleWord) {
+        use self::Register16::*;
+        use self::Register8::*;
         let (lo, hi) = split_doubleword(value);
-        self.b = hi;
-        self.c = lo;
+        match register {
+            AF => {
+                self.write8(A, hi);
+                self.write8(F, lo);
+            },
+            BC => {
+                self.write8(B, hi);
+                self.write8(C, lo);
+            },
+            DE => {
+                self.write8(D, hi);
+                self.write8(E, lo)
+            },
+            HL => {
+                self.write8(H, hi);
+                self.write8(L, lo)
+            },
+            SP => self.sp = value,
+            PC => self.pc = value,
+        }
     }
 
-    /// Return the value in the `BC` register
-    pub fn bc(&self) -> DoubleWord {
-        pack_words(self.c, self.b)
+    /// Return the value of a flag
+    pub fn read_flag(&self, flag: Flag) -> bool {
+        use self::Flag::*;
+        match flag {
+            Zf => (self.f & (1 >> ZF_FLAG_BIT_N)) != 0,
+            Nf => (self.f & (1 >> NF_FLAG_BIT_N)) != 0,
+            Hf => (self.f & (1 >> HF_FLAG_BIT_N)) != 0,
+            Cf => (self.f & (1 >> CF_FLAG_BIT_N)) != 0,
+        }
     }
 
-    /// Set the value of the `DE` register
-    pub fn set_de(&mut self, value: DoubleWord) {
-        let (lo, hi) = split_doubleword(value);
-        self.d = hi;
-        self.e = lo;
-    }
-
-    /// Return the value in the `DE` register
-    pub fn de(&self) -> DoubleWord {
-        pack_words(self.e, self.d)
-    }
-
-    /// Set the value of the `HL` register
-    pub fn set_hl(&mut self, value: DoubleWord) {
-        let (lo, hi) = split_doubleword(value);
-        self.h = hi;
-        self.l = lo;
-    }
-
-    /// Return the value in the `HL` register
-    pub fn hl(&self) -> DoubleWord {
-        pack_words(self.l, self.h)
-    }
-
-    fn af(&self) -> DoubleWord {
-        pack_words(self.a, self.f)
-    }
-
-    /// Return the value of the `ZERO` flag
-    pub fn zf_is_set(&self) -> bool {
-        (self.f & 0b0001_0000) != 0
-    }
-
-    /// Return the value of the `CARRY` flag
-    pub fn cf_is_set(&self) -> bool {
-        (self.f & 0b1000_0000) != 0
-    }
-
-    /// Return the value of the `ADD/SUB` flag
-    pub fn nf_is_set(&self) -> bool {
-        (self.f & 0b0010_0000) != 0
-    }
-
-    /// Return the value of the `HALF-CARRY` flag
-    pub fn hf_is_set(&self) -> bool {
-        (self.f & 0b0100_0000) != 0
+    /// Write the value of a flag
+    pub fn write_flag(&mut self, flag: Flag, value: bool) {
+        use self::Flag::*;
+        // TODO: (will) implement me and take your shoes off in the house
+        if value {
+            match flag {
+                Zf => unimplemented!(),
+                Nf => unimplemented!(),
+                Hf => unimplemented!(),
+                Cf => unimplemented!(),
+            }
+        } else {
+            match flag {
+                Zf => unimplemented!(),
+                Nf => unimplemented!(),
+                Hf => unimplemented!(),
+                Cf => unimplemented!(),
+            }
+        }
     }
 }
 
@@ -123,6 +177,7 @@ impl Default for Registers {
 
 impl fmt::Display for Registers {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        use self::Register16::*;
         write!(
             f,
             r#"
@@ -136,16 +191,16 @@ impl fmt::Display for Registers {
             "#,
             self.a,
             self.f,
-            self.af(),
+            self.read16(AF),
             self.b,
             self.c,
-            self.bc(),
+            self.read16(BC),
             self.d,
             self.e,
-            self.de(),
+            self.read16(DE),
             self.h,
             self.l,
-            self.hl(),
+            self.read16(HL),
             self.sp,
             self.pc,
             self.ir,
@@ -159,21 +214,50 @@ mod test {
 
     #[test]
     fn double_registers_set() {
+        use self::Register16::*;
+        use self::Register8::*;
         let mut registers = Registers::default();
-        registers.set_hl(0xFFA0);
 
-        assert_eq!(registers.hl(), 0xFFA0);
-        assert_eq!(registers.h, 0xFF);
-        assert_eq!(registers.l, 0xA0);
+        registers.write16(HL, 0xFFA0);
+        assert_eq!(registers.read16(HL), 0xFFA0);
+        assert_eq!(registers.read8(H), 0xFF);
+        assert_eq!(registers.read8(L), 0xA0);
 
-        registers.set_bc(0xABCD);
-        assert_eq!(registers.bc(), 0xABCD);
-        assert_eq!(registers.b, 0xAB);
-        assert_eq!(registers.c, 0xCD);
+        registers.write16(BC, 0xABCD);
+        assert_eq!(registers.read16(BC), 0xABCD);
+        assert_eq!(registers.read8(B), 0xAB);
+        assert_eq!(registers.read8(C), 0xCD);
 
-        registers.set_de(0xDEAD);
-        assert_eq!(registers.de(), 0xDEAD);
-        assert_eq!(registers.d, 0xDE);
-        assert_eq!(registers.e, 0xAD);
+        registers.write16(DE, 0xDEAD);
+        assert_eq!(registers.read16(DE), 0xDEAD);
+        assert_eq!(registers.read8(D), 0xDE);
+        assert_eq!(registers.read8(E), 0xAD);
+    }
+
+    #[test]
+    fn flag_set_functions() {
+        use self::Flag::*;
+        let mut registers = Registers::default();
+
+        // Test zf
+        registers.write_flag(Zf, true);
+        assert!(registers.read_flag(Zf));
+        registers.write_flag(Zf, false);
+        assert!(!registers.read_flag(Zf));
+
+        registers.write_flag(Nf, true);
+        assert!(registers.read_flag(Nf));
+        registers.write_flag(Nf, false);
+        assert!(!registers.read_flag(Nf));
+
+        registers.write_flag(Hf, true);
+        assert!(registers.read_flag(Hf));
+        registers.write_flag(Hf, false);
+        assert!(!registers.read_flag(Hf));
+
+        registers.write_flag(Cf, true);
+        assert!(registers.read_flag(Cf));
+        registers.write_flag(Cf, false);
+        assert!(!registers.read_flag(Cf));
     }
 }

@@ -6,17 +6,20 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+//! Picture processing unit stuff
+
 use super::mmu::SWRAM;
 use super::MMU;
 use hardware::bios::Bios;
 
-/// A Gameboy graphics processing unit
+/// A Gameboy pictue processes unit
 #[derive(Debug, Clone, Copy)]
-pub struct GPU;
+pub struct PPU;
 
-impl GPU {
-    pub fn new() -> GPU {
-        GPU {}
+impl PPU {
+    /// Create a new pixel processing unit
+    pub fn new() -> PPU {
+        PPU {}
     }
 
     pub fn emulate<S: SWRAM, B: Bios>(&mut self, cycles: usize, mmu: &mut MMU<S, B>) {

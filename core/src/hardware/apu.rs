@@ -18,7 +18,7 @@ impl APU {
         APU {}
     }
 
-    pub fn emulate<S: SWRAM, B: Bios>(&mut self, mmu: &mut MMU<S, B>, cycles: usize) {
-        unimplemented!()
+    pub fn emulate<S: SWRAM, B: Bios>(&mut self, cycles: usize, mmu: &mut MMU<S, B>) {
+        debug!("APU emulation not yet implemented")
     }
 }

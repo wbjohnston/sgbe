@@ -15,7 +15,7 @@ use hardware::cartridge::Cartridge;
 use hardware::cpu::Registers;
 use hardware::memory::{Memory, Memory4Kb, Memory8Kb};
 use hardware::mmu::swram::{self, SWRAM};
-use hardware::{APU, CPU, GPU, MMU};
+use hardware::{APU, CPU, PPU, MMU};
 use isa::{Address, Word};
 
 /// Gameboy
@@ -47,7 +47,7 @@ pub struct System<S: SWRAM, B: Bios> {
     input: Buttons,
     cpu: CPU,
     mmu: MMU<S, B>,
-    gpu: GPU,
+    gpu: PPU,
     apu: APU,
 }
 
@@ -60,7 +60,7 @@ impl<S: SWRAM + Default, B: Bios> System<S, B> {
             input: Buttons::empty(),
             cpu: CPU::new_with_ir(initial_ir),
             mmu: mmu,
-            gpu: GPU::new(),
+            gpu: PPU::new(),
             apu: APU::new(),
         }
     }
@@ -84,6 +84,7 @@ impl<S: SWRAM, B: Bios> System<S, B> {
         let cycles_in_step = self.cpu.step(&mut self.mmu);
 
         self.gpu.emulate(cycles_in_step as usize, &mut self.mmu);
+        self.apu.emulate(cycles_in_step as usize, &mut self.mmu);
         cycles_in_step
     }
 
@@ -97,9 +98,8 @@ impl<S: SWRAM, B: Bios> System<S, B> {
 
     /// Set the input state the next cycle will read from, then return the
     /// input that was passed in
-    pub fn set_input(&mut self, buttons: Buttons) -> Buttons {
+    pub fn set_input(&mut self, buttons: Buttons) {
         self.input = buttons;
-        buttons
     }
 
     /// Return current input state
