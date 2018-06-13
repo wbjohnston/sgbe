@@ -55,10 +55,9 @@ impl<S: SWRAM + Default, B: Bios> System<S, B> {
     /// Create a new system with no loaded catridge
     pub fn new(bios: B) -> Self {
         let mmu = MMU::<S, B>::new(bios);
-        let initial_ir = mmu.read(0);
         System {
             input: Buttons::empty(),
-            cpu: CPU::new_with_ir(initial_ir),
+            cpu: CPU::new(),
             mmu: mmu,
             gpu: PPU::new(),
             apu: APU::new(),

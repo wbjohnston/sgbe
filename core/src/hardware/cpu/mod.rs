@@ -38,20 +38,9 @@ impl CPU {
         }
     }
 
-    pub fn new_with_ir(ir: Word) -> Self {
-        let mut registers = Registers::default();
-        registers.ir = ir;
-        CPU {
-            ime: false,
-            is_halted: false,
-            registers: registers,
-        }
-    }
-
     /// Execute the current instruction and advance the CPU forward one step, Returns the
     /// number of cycles used
     pub fn step<M: Memory>(&mut self, memory: &mut M) -> u8 {
-        self.registers.ir = memory.read(self.registers.pc);
         // read in raw value of instruction into ir
         let instruction = decode(memory, self.registers.pc);
         self.registers.pc += instruction.size() as Address;

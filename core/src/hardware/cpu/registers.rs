@@ -18,7 +18,6 @@ const NF_FLAG_BIT_N: u8 = 6;
 const HF_FLAG_BIT_N: u8 = 5;
 const CF_FLAG_BIT_N: u8 = 4;
 
-const DEFAULT_IR_VALUE: Word = 0x00;
 const DEFAULT_A_VALUE: Word = 0x00;
 const DEFAULT_F_VALUE: Word = 0x00;
 const DEFAULT_B_VALUE: Word = 0x00;
@@ -43,7 +42,6 @@ pub struct Registers {
     pub e: Word,
     pub h: Word,
     pub l: Word,
-    pub ir: Word,
     pub sp: DoubleWord,
     pub pc: DoubleWord,
 }
@@ -93,7 +91,6 @@ impl Registers {
         }
     }
 
-    // TODO: (will) rename to `write_register16`
     /// Set the value in an 16-bit register
     pub fn write_register16(&mut self, register: Register16, value: DoubleWord) {
         use self::Register16::*;
@@ -165,7 +162,6 @@ impl Registers {
 impl Default for Registers {
     fn default() -> Self {
         Registers {
-            ir: DEFAULT_IR_VALUE,
             a: DEFAULT_A_VALUE,
             f: DEFAULT_F_VALUE,
             b: DEFAULT_B_VALUE,
@@ -192,7 +188,6 @@ impl fmt::Display for Registers {
             H: {:4x} L: {:4x} HL: {:8x}
             SP: {:4x}
             PC: {:4x}
-            IR: {:4x}
             "#,
             self.a,
             self.f,
@@ -208,7 +203,6 @@ impl fmt::Display for Registers {
             self.read_register16(HL),
             self.sp,
             self.pc,
-            self.ir,
         )
     }
 }
