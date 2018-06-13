@@ -15,7 +15,7 @@ use hardware::cartridge::Cartridge;
 use hardware::cpu::Registers;
 use hardware::memory::{Memory, Memory4Kb, Memory8Kb};
 use hardware::mmu::swram::{self, SWRAM};
-use hardware::{APU, CPU, PPU, MMU};
+use hardware::{APU, CPU, MMU, PPU};
 use isa::{Address, Word};
 
 /// Gameboy

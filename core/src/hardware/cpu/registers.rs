@@ -10,13 +10,13 @@
 
 use std::fmt;
 
-use hardware::{pack_words, split_doubleword, split_word};
+use hardware::{pack_words, split_doubleword};
 use isa::{DoubleWord, Flag, Register16, Register8, Word};
 
-const ZF_FLAG_BIT_N: usize = 0;
-const NF_FLAG_BIT_N: usize = 0;
-const HF_FLAG_BIT_N: usize = 0;
-const CF_FLAG_BIT_N: usize = 0;
+const ZF_FLAG_BIT_N: u8 = 7;
+const NF_FLAG_BIT_N: u8 = 6;
+const HF_FLAG_BIT_N: u8 = 5;
+const CF_FLAG_BIT_N: u8 = 4;
 
 const DEFAULT_IR_VALUE: Word = 0x00;
 const DEFAULT_A_VALUE: Word = 0x00;
@@ -49,9 +49,8 @@ pub struct Registers {
 }
 
 impl Registers {
-    // TODO: (will) rename to `read_register8`
     /// Return the value in an 8-bit register
-    pub fn read8(&self, register: Register8) -> Word {
+    pub fn read_register8(&self, register: Register8) -> Word {
         use self::Register8::*;
         match register {
             A => self.a,
@@ -65,9 +64,8 @@ impl Registers {
         }
     }
 
-    // TODO: (will) rename to `write_register8`
     /// Set the value in an 8-bit register
-    pub fn write8(&mut self, register: Register8, value: Word) {
+    pub fn write_register8(&mut self, register: Register8, value: Word) {
         use self::Register8::*;
         match register {
             A => self.a = value,
@@ -81,16 +79,15 @@ impl Registers {
         }
     }
 
-    // TODO: (will) rename to `read_register16`
     /// Get the value in an 16-bit register
-    pub fn read16(&self, register: Register16) -> DoubleWord {
+    pub fn read_register16(&self, register: Register16) -> DoubleWord {
         use self::Register16::*;
         use self::Register8::*;
         match register {
-            AF => pack_words(self.read8(F), self.read8(A)),
-            BC => pack_words(self.read8(C), self.read8(B)),
-            DE => pack_words(self.read8(E), self.read8(D)),
-            HL => pack_words(self.read8(L), self.read8(H)),
+            AF => pack_words(self.read_register8(F), self.read_register8(A)),
+            BC => pack_words(self.read_register8(C), self.read_register8(B)),
+            DE => pack_words(self.read_register8(E), self.read_register8(D)),
+            HL => pack_words(self.read_register8(L), self.read_register8(H)),
             SP => self.sp,
             PC => self.pc,
         }
@@ -104,21 +101,21 @@ impl Registers {
         let (lo, hi) = split_doubleword(value);
         match register {
             AF => {
-                self.write8(A, hi);
-                self.write8(F, lo);
-            },
+                self.write_register8(A, hi);
+                self.write_register8(F, lo);
+            }
             BC => {
-                self.write8(B, hi);
-                self.write8(C, lo);
-            },
+                self.write_register8(B, hi);
+                self.write_register8(C, lo);
+            }
             DE => {
-                self.write8(D, hi);
-                self.write8(E, lo)
-            },
+                self.write_register8(D, hi);
+                self.write_register8(E, lo)
+            }
             HL => {
-                self.write8(H, hi);
-                self.write8(L, lo)
-            },
+                self.write_register8(H, hi);
+                self.write_register8(L, lo)
+            }
             SP => self.sp = value,
             PC => self.pc = value,
         }
@@ -128,30 +125,38 @@ impl Registers {
     pub fn read_flag(&self, flag: Flag) -> bool {
         use self::Flag::*;
         match flag {
-            Zf => (self.f & (1 >> ZF_FLAG_BIT_N)) != 0,
-            Nf => (self.f & (1 >> NF_FLAG_BIT_N)) != 0,
-            Hf => (self.f & (1 >> HF_FLAG_BIT_N)) != 0,
-            Cf => (self.f & (1 >> CF_FLAG_BIT_N)) != 0,
+            Zf => self.f & (1 << ZF_FLAG_BIT_N) != 0,
+            Nf => self.f & (1 << NF_FLAG_BIT_N) != 0,
+            Hf => self.f & (1 << HF_FLAG_BIT_N) != 0,
+            Cf => self.f & (1 << CF_FLAG_BIT_N) != 0,
         }
     }
 
     /// Write the value of a flag
     pub fn write_flag(&mut self, flag: Flag, value: bool) {
         use self::Flag::*;
-        // TODO: (will) implement me and take your shoes off in the house
+
+        fn set_bit(byte: &mut u8, n: u8) {
+            *byte |= 1 << n;
+        }
+
+        fn unset_bit(byte: &mut u8, n: u8) {
+            *byte &= !(1 << n);
+        }
+
         if value {
             match flag {
-                Zf => unimplemented!(),
-                Nf => unimplemented!(),
-                Hf => unimplemented!(),
-                Cf => unimplemented!(),
+                Zf => set_bit(&mut self.f, ZF_FLAG_BIT_N),
+                Nf => set_bit(&mut self.f, NF_FLAG_BIT_N),
+                Hf => set_bit(&mut self.f, HF_FLAG_BIT_N),
+                Cf => set_bit(&mut self.f, CF_FLAG_BIT_N),
             }
         } else {
             match flag {
-                Zf => unimplemented!(),
-                Nf => unimplemented!(),
-                Hf => unimplemented!(),
-                Cf => unimplemented!(),
+                Zf => unset_bit(&mut self.f, ZF_FLAG_BIT_N),
+                Nf => unset_bit(&mut self.f, NF_FLAG_BIT_N),
+                Hf => unset_bit(&mut self.f, HF_FLAG_BIT_N),
+                Cf => unset_bit(&mut self.f, CF_FLAG_BIT_N),
             }
         }
     }
@@ -191,16 +196,16 @@ impl fmt::Display for Registers {
             "#,
             self.a,
             self.f,
-            self.read16(AF),
+            self.read_register16(AF),
             self.b,
             self.c,
-            self.read16(BC),
+            self.read_register16(BC),
             self.d,
             self.e,
-            self.read16(DE),
+            self.read_register16(DE),
             self.h,
             self.l,
-            self.read16(HL),
+            self.read_register16(HL),
             self.sp,
             self.pc,
             self.ir,
@@ -219,19 +224,24 @@ mod test {
         let mut registers = Registers::default();
 
         registers.write16(HL, 0xFFA0);
-        assert_eq!(registers.read16(HL), 0xFFA0);
-        assert_eq!(registers.read8(H), 0xFF);
-        assert_eq!(registers.read8(L), 0xA0);
+        assert_eq!(registers.read_register16(HL), 0xFFA0);
+        assert_eq!(registers.read_register8(H), 0xFF);
+        assert_eq!(registers.read_register8(L), 0xA0);
 
         registers.write16(BC, 0xABCD);
-        assert_eq!(registers.read16(BC), 0xABCD);
-        assert_eq!(registers.read8(B), 0xAB);
-        assert_eq!(registers.read8(C), 0xCD);
+        assert_eq!(registers.read_register16(BC), 0xABCD);
+        assert_eq!(registers.read_register8(B), 0xAB);
+        assert_eq!(registers.read_register8(C), 0xCD);
 
         registers.write16(DE, 0xDEAD);
-        assert_eq!(registers.read16(DE), 0xDEAD);
-        assert_eq!(registers.read8(D), 0xDE);
-        assert_eq!(registers.read8(E), 0xAD);
+        assert_eq!(registers.read_register16(DE), 0xDEAD);
+        assert_eq!(registers.read_register8(D), 0xDE);
+        assert_eq!(registers.read_register8(E), 0xAD);
+
+        // Verify that changing other registers doesn't interfere
+        assert_eq!(registers.read_register16(HL), 0xFFA0);
+        assert_eq!(registers.read_register16(BC), 0xABCD);
+        assert_eq!(registers.read_register16(DE), 0xDEAD);
     }
 
     #[test]

@@ -6,6 +6,8 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+use std::fmt;
+
 mod types;
 pub use self::types::{Address, DoubleWord, Immediate, Immediate16, SignedImmediate, Word};
 
@@ -22,6 +24,13 @@ pub enum Register8 {
     L,
 }
 
+impl fmt::Display for Register8 {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        // TODO:  implement me
+        unimplemented!()
+    }
+}
+
 /// A 16-bit register
 #[derive(Debug, Copy, Clone)]
 pub enum Register16 {
@@ -33,6 +42,13 @@ pub enum Register16 {
     PC,
 }
 
+impl fmt::Display for Register16 {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        // TODO:  implement me
+        unimplemented!()
+    }
+}
+
 /// A CPU flag
 #[derive(Debug, Copy, Clone)]
 pub enum Flag {
@@ -40,6 +56,13 @@ pub enum Flag {
     Nf,
     Hf,
     Cf,
+}
+
+impl fmt::Display for Flag {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        // TODO:  implement me
+        unimplemented!()
+    }
 }
 
 /// A Gameboy CPU Instruction

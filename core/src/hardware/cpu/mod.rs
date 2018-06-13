@@ -49,13 +49,13 @@ impl CPU {
 
     /// Execute the current instruction and advance the CPU forward one step, Returns the
     /// number of cycles used
-    pub fn step<M: Memory>(&mut self, mmu: &mut M) -> u8 {
-        self.registers.ir = mmu.read(self.registers.pc);
+    pub fn step<M: Memory>(&mut self, memory: &mut M) -> u8 {
+        self.registers.ir = memory.read(self.registers.pc);
         // read in raw value of instruction into ir
-        let instruction = decode(mmu, self.registers.pc);
+        let instruction = decode(memory, self.registers.pc);
         self.registers.pc += instruction.size() as Address;
 
-        let cycles_used = self.execute(instruction, mmu);
+        let cycles_used = self.execute(instruction, memory);
         cycles_used
     }
 
@@ -68,198 +68,139 @@ impl CPU {
     fn execute<M: Memory>(&mut self, instruction: Instruction, memory: &mut M) -> u8 {
         use self::Instruction::*;
         use self::Register16::*;
-        match instruction {
-            i @ Nop => i.cycles(),
-            LdRrIi(..) => self.execute_LdRrIi(instruction),
-            XorAR(..) => self.execute_XorAR(instruction),
-            XorAI(..) => self.execute_XorAI(instruction),
-            AndAR(..) => self.execute_AndAR(instruction),
-            BitIR(..) => self.execute_BitIR(instruction),
-            JrCondS(..) => self.exectue_JrCondS(instruction),
-            LdRI(..) => self.execute_LdRI(instruction),
-            LdAI(..) => self.execute_LdAI(instruction),
-            LdHlR(..) => self.execute_LdHlR(instruction, memory),
-            AddAR(..) => self.execute_AddAR(instruction),
-            LdIocA => self.execute_LdIocA(instruction, memory),
-            Di => self.execute_Di(instruction, memory),
-            LddHlA => {
-                self.registers.a = memory.read(self.registers.read16(HL));
-                let hl = self.registers.read16(HL);
-                self.registers.write16(HL, hl + 1);
-
-                instruction.cycles()
-            }
+        let branched = match instruction {
+            Nop => self.exectue_nop(),
+            LdRrIi(register, immediate) => self.execute_ld_rr_ii(register, immediate),
+            XorAR(register) => self.execute_xor_a_r(register),
+            XorAI(immediate) => self.execute_xor_a_i(immediate),
+            AndAR(register) => self.execute_and_a_r(register),
+            BitIR(immediate, register) => self.execute_bit_i_r(immediate, register),
+            LddHlA => self.execute_ldd_hl_a(),
             v => {
                 unimplemented!("{:?} instruction not implemented", v);
             }
+        };
+
+        if branched {
+            instruction.cycles_on_branch()
+        } else {
+            instruction.cycles()
         }
     }
 
-    #[allow(non_snake_case)]
-    fn execute_LdHlR<M: Memory>(&mut self, instruction: Instruction, memory: &mut M) -> u8 {
-        use self::Instruction::LdHlR;
-        use self::Register16::HL;
-        use self::Register8::*;
-        match instruction {
-            LdHlR(A) => memory.write(self.registers.read16(HL), self.registers.a),
-            _ => unimplemented!(),
-        }
-        instruction.cycles()
+    #[inline]
+    fn exectue_nop(&mut self) -> bool {
+        false
     }
 
-    #[allow(non_snake_case)]
-    fn execute_Di<M: Memory>(&mut self, instruction: Instruction, memory: &mut M) -> u8 {
+    #[inline]
+    fn execute_ldd_hl_a(&mut self) -> bool {
+        unimplemented!()
+    }
+
+    #[inline]
+    fn execute_ld_hl_r<M: Memory>(&mut self, register: Register8, memory: &M) -> bool {
+        let hl_val = self.registers.read_register16(Register16::HL);
+        self.registers
+            .write_register8(Register8::A, memory.read(hl_val));
+        false
+    }
+
+    #[inline]
+    fn execute_di<M: Memory>(&mut self, instruction: Instruction, memory: &mut M) -> bool {
         memory.write(0xFFFF, 0x00);
-        instruction.cycles()
+        false
     }
 
-    #[allow(non_snake_case)]
-    fn execute_LdIocA<M: Memory>(&mut self, instruction: Instruction, memory: &M) -> u8 {
+    #[inline]
+    fn execute_ld_ioc_a<M: Memory>(&mut self, instruction: Instruction, memory: &M) -> bool {
         self.registers.a = memory.read(0xFF00 + self.registers.c as DoubleWord);
-        instruction.cycles()
+        false
     }
 
-    #[allow(non_snake_case)]
-    fn execute_LdAI(&mut self, instruction: Instruction) -> u8 {
-        use self::Instruction::LdAI;
-        use self::Register8::*;
-
-        match instruction {
-            LdAI(v) => self.registers.a = v,
-            _ => unimplemented!(),
-        }
-
-        instruction.cycles()
+    #[inline]
+    fn execute_ld_a_i(&mut self, immediate: Immediate) -> bool {
+        self.registers.a = immediate;
+        false
     }
 
-    #[allow(non_snake_case)]
-    fn execute_LdRI(&mut self, instruction: Instruction) -> u8 {
-        use self::Instruction::LdRI;
-        use self::Register8::*;
-
-        match instruction {
-            LdRI(C, imm) => self.registers.c = imm,
-            _ => unimplemented!(),
-        }
-
-        instruction.cycles()
+    #[inline]
+    fn execute_ld_r_i(&mut self, register: Register8, immediate: Immediate) -> bool {
+        self.registers.write_register8(register, immediate);
+        false
     }
 
-    #[allow(non_snake_case)]
-    fn exectue_JrCondS(&mut self, instruction: Instruction) -> u8 {
-        use self::Instruction::JrCondS;
-        match instruction {
-            JrCondS(flag, v) => if self.registers.read_flag(flag) {
-                self.registers.pc = if v < 0 {
-                    self.registers.pc - (-v) as Address
-                } else {
-                    self.registers.pc + v as Address
-                };
-                instruction.cycles_on_branch()
-            } else {
-                instruction.cycles()
-            },
-            _ => unimplemented!(),
+    #[inline]
+    fn exectue_jr_cond_s(&mut self, condition: Flag, offset: Immediate16) -> bool {
+        trace!("Executing jr {} {}", condition, offset);
+        if self.registers.read_flag(condition) {
+            debug!("Instruction not implemented");
+            true
+        } else {
+            debug!("Instruction not implemented");
+            false
         }
     }
 
-    #[allow(non_snake_case)]
-    fn execute_BitIR(&mut self, instruction: Instruction) -> u8 {
-        use self::Instruction::BitIR;
-        use self::Register8::*;
-        debug!("Executing BitIR instruction");
-        match instruction {
-            BitIR(v, H) => debug!("call to {:?} is not implemented", instruction),
-            BitIR(..) => unimplemented!("{:?} instruction is not implemented", instruction),
-            _ => unreachable!(),
-        }
+    #[inline]
+    fn execute_bit_i_r(&mut self, immediate: Immediate, register: Register8) -> bool {
+        trace!("Executing bit {} {}", immediate, register);
+        debug!("Instruction not implemented");
 
-        instruction.cycles()
+        // TODO: (will) implement me
+        unimplemented!()
     }
 
-    #[allow(non_snake_case)]
-    fn execute_LdRrIi(&mut self, instruction: Instruction) -> u8 {
-        use self::Instruction::LdRrIi;
-        use self::Register16::*;
-
-        match instruction {
-            LdRrIi(reg, imm) => self.registers.write16(reg, imm),
-            LdRrIi(..) => unimplemented!("{:?} instruction not implemented", instruction),
-            _ => unreachable!(),
-        }
-
-        instruction.cycles()
+    #[inline]
+    fn execute_ld_rr_ii(&mut self, register: Register16, immediate: Immediate16) -> bool {
+        trace!("Executing ld {} {}", register, immediate);
+        self.registers.write16(register, immediate);
+        false
     }
 
-    #[allow(non_snake_case)]
-    fn execute_AndAR(&mut self, instruction: Instruction) -> u8 {
-        use self::Instruction::AndAR;
-        use self::Register8::*;
+    #[inline]
+    fn execute_and_a_r(&mut self, register: Register8) -> bool {
+        trace!("Executing and a {}", register);
+        let a_value = self.registers.read_register8(Register8::A);
+        let reg_value = self.registers.read_register8(register);
 
-        match instruction {
-            AndAR(A) => self.registers.a &= self.registers.a,
-            AndAR(B) => self.registers.a &= self.registers.b,
-            AndAR(C) => self.registers.a &= self.registers.c,
-            AndAR(D) => self.registers.a &= self.registers.d,
-            AndAR(E) => self.registers.a &= self.registers.e,
-            AndAR(H) => self.registers.a &= self.registers.h,
-            AndAR(L) => self.registers.a &= self.registers.l,
-            AndAR(..) => unimplemented!("{:?} instruction not implemented", instruction),
-            _ => unreachable!(),
-        }
+        self.registers
+            .write_register8(Register8::A, a_value & reg_value);
 
-        instruction.cycles()
+        false
     }
 
-    #[allow(non_snake_case)]
-    fn execute_AddAR(&mut self, instruction: Instruction) -> u8 {
-        use self::Instruction::AddAR;
-        use self::Register8::*;
+    #[inline]
+    fn execute_add_a_r(&mut self, register: Register8) -> bool {
+        trace!("Executing add a {}", register);
+        use self::Register8::A;
+        let a_value = self.registers.read_register8(A);
+        let reg_value = self.registers.read_register8(register);
 
-        match instruction {
-            AddAR(A) => self.registers.a += self.registers.a,
-            AddAR(B) => self.registers.a += self.registers.b,
-            AddAR(C) => self.registers.a += self.registers.c,
-            AddAR(D) => self.registers.a += self.registers.d,
-            AddAR(E) => self.registers.a += self.registers.e,
-            AddAR(H) => self.registers.a += self.registers.h,
-            AddAR(L) => self.registers.a += self.registers.l,
-            AddAR(..) => unimplemented!("{:?} instruction not implemented", instruction),
-            _ => unreachable!(),
-        }
+        self.registers.write_register8(A, a_value + reg_value);
 
-        instruction.cycles()
+        false
     }
 
-    #[allow(non_snake_case)]
-    fn execute_XorAR(&mut self, instruction: Instruction) -> u8 {
-        use self::Instruction::XorAR;
-        use self::Register8::*;
+    #[inline]
+    fn execute_xor_a_r(&mut self, register: Register8) -> bool {
+        trace!("Executing xor a {}", register);
+        use self::Register8::A;
+        let a_value = self.registers.read_register8(A);
+        let reg_value = self.registers.read_register8(register);
 
-        match instruction {
-            XorAR(A) => self.registers.a ^= self.registers.a,
-            XorAR(B) => self.registers.a ^= self.registers.b,
-            XorAR(C) => self.registers.a ^= self.registers.c,
-            XorAR(D) => self.registers.a ^= self.registers.d,
-            XorAR(E) => self.registers.a ^= self.registers.e,
-            XorAR(H) => self.registers.a ^= self.registers.h,
-            XorAR(L) => self.registers.a ^= self.registers.l,
-            XorAR(..) => unimplemented!("{:?} instruction not implemented", instruction),
-            _ => unreachable!(),
-        }
+        self.registers.write_register8(A, a_value ^ reg_value);
 
-        instruction.cycles()
+        false
     }
 
-    #[allow(non_snake_case)]
-    pub fn execute_XorAI(&mut self, instruction: Instruction) -> u8 {
-        use self::Instruction::XorAI;
+    #[inline]
+    pub fn execute_xor_a_i(&mut self, immediate: Immediate) -> bool {
+        trace!("Executing xor a {}", immediate);
+        use self::Register8::A;
+        let a_value = self.registers.read_register8(A);
+        self.registers.write_register8(A, a_value ^ immediate);
 
-        match instruction {
-            XorAI(v) => self.registers.a ^= v,
-            _ => unreachable!(),
-        }
-
-        instruction.cycles()
+        false
     }
 }
