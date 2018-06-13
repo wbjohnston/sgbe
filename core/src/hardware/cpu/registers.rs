@@ -95,7 +95,7 @@ impl Registers {
 
     // TODO: (will) rename to `write_register16`
     /// Set the value in an 16-bit register
-    pub fn write16(&mut self, register: Register16, value: DoubleWord) {
+    pub fn write_register16(&mut self, register: Register16, value: DoubleWord) {
         use self::Register16::*;
         use self::Register8::*;
         let (lo, hi) = split_doubleword(value);
@@ -223,17 +223,17 @@ mod test {
         use self::Register8::*;
         let mut registers = Registers::default();
 
-        registers.write16(HL, 0xFFA0);
+        registers.write_register16(HL, 0xFFA0);
         assert_eq!(registers.read_register16(HL), 0xFFA0);
         assert_eq!(registers.read_register8(H), 0xFF);
         assert_eq!(registers.read_register8(L), 0xA0);
 
-        registers.write16(BC, 0xABCD);
+        registers.write_register16(BC, 0xABCD);
         assert_eq!(registers.read_register16(BC), 0xABCD);
         assert_eq!(registers.read_register8(B), 0xAB);
         assert_eq!(registers.read_register8(C), 0xCD);
 
-        registers.write16(DE, 0xDEAD);
+        registers.write_register16(DE, 0xDEAD);
         assert_eq!(registers.read_register16(DE), 0xDEAD);
         assert_eq!(registers.read_register8(D), 0xDE);
         assert_eq!(registers.read_register8(E), 0xAD);

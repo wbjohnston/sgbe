@@ -14,7 +14,8 @@ pub use self::registers::Registers;
 use disasm::decode;
 use hardware::memory::Memory;
 use isa::{
-    Address, DoubleWord, Flag, Immediate, Immediate16, Instruction, Register16, Register8, Word,
+    Address, DoubleWord, Flag, Immediate, Immediate16, Instruction, Register16, Register8,
+    SignedImmediate, Word,
 };
 
 pub const CYCLES_PER_SECOND: usize = 4_194_304;
@@ -67,21 +68,29 @@ impl CPU {
     /// Execute an instruction, returning the number of cycles used
     fn execute<M: Memory>(&mut self, instruction: Instruction, memory: &mut M) -> u8 {
         use self::Instruction::*;
-        use self::Register16::*;
-        let branched = match instruction {
+        let did_branch = match instruction {
             Nop => self.exectue_nop(),
             LdRrIi(register, immediate) => self.execute_ld_rr_ii(register, immediate),
             XorAR(register) => self.execute_xor_a_r(register),
             XorAI(immediate) => self.execute_xor_a_i(immediate),
             AndAR(register) => self.execute_and_a_r(register),
             BitIR(immediate, register) => self.execute_bit_i_r(immediate, register),
-            LddHlA => self.execute_ldd_hl_a(),
+            LddAHl => self.execute_ldd_a_hl(memory),
+            LddHlA => self.execute_ldd_hl_a(memory),
+            LdHlR(register) => self.execute_ld_hl_r(register, memory),
+            Di => self.execute_di(memory),
+            Ei => self.execute_ei(memory),
+            LdIocA => self.execute_ld_ioc_a(memory),
+            LdAI(immediate) => self.execute_ld_a_i(immediate),
+            LdRI(register, immediate) => self.execute_ld_r_i(register, immediate),
+            AddAR(register) => self.execute_add_a_r(register),
+            JrCondS(condition, offset) => self.exectue_jr_cond_s(condition, offset),
             v => {
                 unimplemented!("{:?} instruction not implemented", v);
             }
         };
 
-        if branched {
+        if did_branch {
             instruction.cycles_on_branch()
         } else {
             instruction.cycles()
@@ -94,12 +103,28 @@ impl CPU {
     }
 
     #[inline]
-    fn execute_ldd_hl_a(&mut self) -> bool {
-        unimplemented!()
+    fn execute_ldd_hl_a<M: Memory>(&mut self, memory: &mut M) -> bool {
+        let a_val = self.registers.read_register8(Register8::A);
+        let hl_val = self.registers.read_register16(Register16::HL);
+        memory.write(hl_val, a_val);
+
+        // decrement HL
+        self.registers.write_register16(Register16::HL, hl_val - 1);
+        false
+    }
+
+    #[inline]
+    fn execute_ldd_a_hl<M: Memory>(&mut self, memory: &M) -> bool {
+        let hl_val = self.registers.read_register16(Register16::HL);
+        self.registers
+            .write_register8(Register8::A, memory.read(hl_val));
+        self.registers.write_register16(Register16::HL, hl_val - 1);
+        false
     }
 
     #[inline]
     fn execute_ld_hl_r<M: Memory>(&mut self, register: Register8, memory: &M) -> bool {
+        trace!("Executing ld hl {}", register);
         let hl_val = self.registers.read_register16(Register16::HL);
         self.registers
             .write_register8(Register8::A, memory.read(hl_val));
@@ -107,31 +132,42 @@ impl CPU {
     }
 
     #[inline]
-    fn execute_di<M: Memory>(&mut self, instruction: Instruction, memory: &mut M) -> bool {
-        memory.write(0xFFFF, 0x00);
+    fn execute_di<M: Memory>(&mut self, memory: &mut M) -> bool {
+        trace!("Exeucting di");
+        memory.write(0xFFFF, 0x00); // TODO: Is this the right value?
         false
     }
 
     #[inline]
-    fn execute_ld_ioc_a<M: Memory>(&mut self, instruction: Instruction, memory: &M) -> bool {
+    fn execute_ei<M: Memory>(&mut self, memory: &mut M) -> bool {
+        trace!("Executing ei");
+        memory.write(0xFFFF, 0xFF); // TODO: is this the right value?
+        false
+    }
+
+    #[inline]
+    fn execute_ld_ioc_a<M: Memory>(&mut self, memory: &M) -> bool {
+        trace!("Executing ld ioc a"); // TODO: better trace
         self.registers.a = memory.read(0xFF00 + self.registers.c as DoubleWord);
         false
     }
 
     #[inline]
     fn execute_ld_a_i(&mut self, immediate: Immediate) -> bool {
+        trace!("Executing ld a {}", immediate);
         self.registers.a = immediate;
         false
     }
 
     #[inline]
     fn execute_ld_r_i(&mut self, register: Register8, immediate: Immediate) -> bool {
+        trace!("Executing ld {} {}", register, immediate);
         self.registers.write_register8(register, immediate);
         false
     }
 
     #[inline]
-    fn exectue_jr_cond_s(&mut self, condition: Flag, offset: Immediate16) -> bool {
+    fn exectue_jr_cond_s(&mut self, condition: Flag, offset: SignedImmediate) -> bool {
         trace!("Executing jr {} {}", condition, offset);
         if self.registers.read_flag(condition) {
             debug!("Instruction not implemented");
@@ -148,13 +184,13 @@ impl CPU {
         debug!("Instruction not implemented");
 
         // TODO: (will) implement me
-        unimplemented!()
+        false
     }
 
     #[inline]
     fn execute_ld_rr_ii(&mut self, register: Register16, immediate: Immediate16) -> bool {
         trace!("Executing ld {} {}", register, immediate);
-        self.registers.write16(register, immediate);
+        self.registers.write_register16(register, immediate);
         false
     }
 
@@ -173,11 +209,11 @@ impl CPU {
     #[inline]
     fn execute_add_a_r(&mut self, register: Register8) -> bool {
         trace!("Executing add a {}", register);
-        use self::Register8::A;
-        let a_value = self.registers.read_register8(A);
+        let a_value = self.registers.read_register8(Register8::A);
         let reg_value = self.registers.read_register8(register);
 
-        self.registers.write_register8(A, a_value + reg_value);
+        self.registers
+            .write_register8(Register8::A, a_value + reg_value);
 
         false
     }
@@ -195,7 +231,7 @@ impl CPU {
     }
 
     #[inline]
-    pub fn execute_xor_a_i(&mut self, immediate: Immediate) -> bool {
+    fn execute_xor_a_i(&mut self, immediate: Immediate) -> bool {
         trace!("Executing xor a {}", immediate);
         use self::Register8::A;
         let a_value = self.registers.read_register8(A);
