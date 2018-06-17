@@ -88,7 +88,7 @@ fn main() -> Result<(), Error> {
         out_handle.flush()?;
 
         let len = stdin.read_line(&mut input)?;
-        let mut last_pc = emulator.pc();
+        let last_pc = emulator.pc();
 
         match parse_command(&input[0..len - 1]) {
             Command::Help => print_help(),

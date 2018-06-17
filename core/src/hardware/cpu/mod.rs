@@ -72,8 +72,19 @@ impl CPU {
             LdIocA => self.execute_ld_ioc_a(memory),
             LdAI(immediate) => self.execute_ld_a_i(immediate),
             LdRI(register, immediate) => self.execute_ld_r_i(register, immediate),
+            LdIoA(immediate) => self.execute_ld_io_a(immediate, memory),
+            LdAIo(immediate) => self.execute_ld_a_io(immediate, memory),
             AddAR(register) => self.execute_add_a_r(register),
             JrCondS(condition, offset) => self.exectue_jr_cond_s(condition, offset),
+            LdRR(a, b) => self.execute_ld_r_r(a, b),
+            LdARr(register) => self.execute_ld_a_rr(register, memory),
+            CallIi(address) => self.execute_call_ii(address, memory),
+            IncRr(register) => self.execute_inc_rr(register),
+            IncR(register) => self.execute_inc_r(register),
+            DecRr(register) => self.execute_dec_rr(register),
+            DecR(register) => self.execute_dec_r(register),
+            CpAI(immediate) => self.execute_cp_a_i(immediate),
+            PushRr(register) => self.execute_push_rr(register, memory),
             v => {
                 unimplemented!("{:?} instruction not implemented", v);
             }
@@ -113,7 +124,6 @@ impl CPU {
 
     #[inline]
     fn execute_ld_hl_r<M: Memory>(&mut self, register: Register8, memory: &M) -> bool {
-        trace!("Executing ld hl {}", register);
         let hl_val = self.registers.read_register16(Register16::HL);
         self.registers
             .write_register8(Register8::A, memory.read(hl_val));
@@ -122,42 +132,36 @@ impl CPU {
 
     #[inline]
     fn execute_di<M: Memory>(&mut self, memory: &mut M) -> bool {
-        trace!("Exeucting di");
         memory.write(0xFFFF, 0x00); // TODO: Is this the right value?
         false
     }
 
     #[inline]
     fn execute_ei<M: Memory>(&mut self, memory: &mut M) -> bool {
-        trace!("Executing ei");
         memory.write(0xFFFF, 0xFF); // TODO: is this the right value?
         false
     }
 
     #[inline]
     fn execute_ld_ioc_a<M: Memory>(&mut self, memory: &M) -> bool {
-        trace!("Executing ld ioc a"); // TODO: better trace
         self.registers.a = memory.read(0xFF00 + self.registers.c as DoubleWord);
         false
     }
 
     #[inline]
     fn execute_ld_a_i(&mut self, immediate: Immediate) -> bool {
-        trace!("Executing ld a {}", immediate);
         self.registers.a = immediate;
         false
     }
 
     #[inline]
     fn execute_ld_r_i(&mut self, register: Register8, immediate: Immediate) -> bool {
-        trace!("Executing ld {} {}", register, immediate);
         self.registers.write_register8(register, immediate);
         false
     }
 
     #[inline]
     fn exectue_jr_cond_s(&mut self, condition: Flag, offset: SignedImmediate) -> bool {
-        trace!("Executing jr {} {}", condition, offset);
         if self.registers.read_flag(condition) {
             debug!("Instruction not implemented");
             true
@@ -169,7 +173,6 @@ impl CPU {
 
     #[inline]
     fn execute_bit_i_r(&mut self, immediate: Immediate, register: Register8) -> bool {
-        trace!("Executing bit {} {}", immediate, register);
         debug!("Instruction not implemented");
 
         // TODO: (will) implement me
@@ -178,14 +181,13 @@ impl CPU {
 
     #[inline]
     fn execute_ld_rr_ii(&mut self, register: Register16, immediate: Immediate16) -> bool {
-        trace!("Executing ld {} {}", register, immediate);
         self.registers.write_register16(register, immediate);
         false
     }
 
     #[inline]
     fn execute_and_a_r(&mut self, register: Register8) -> bool {
-        trace!("Executing and a {}", register);
+        // TODO: need to set flags
         let a_value = self.registers.read_register8(Register8::A);
         let reg_value = self.registers.read_register8(register);
 
@@ -197,7 +199,7 @@ impl CPU {
 
     #[inline]
     fn execute_add_a_r(&mut self, register: Register8) -> bool {
-        trace!("Executing add a {}", register);
+        // TODO: need to set flags
         let a_value = self.registers.read_register8(Register8::A);
         let reg_value = self.registers.read_register8(register);
 
@@ -209,7 +211,7 @@ impl CPU {
 
     #[inline]
     fn execute_xor_a_r(&mut self, register: Register8) -> bool {
-        trace!("Executing xor a {}", register);
+        // TODO: need to set flags
         use self::Register8::A;
         let a_value = self.registers.read_register8(A);
         let reg_value = self.registers.read_register8(register);
@@ -221,11 +223,97 @@ impl CPU {
 
     #[inline]
     fn execute_xor_a_i(&mut self, immediate: Immediate) -> bool {
-        trace!("Executing xor a {}", immediate);
+        // TODO: need to set flags
         use self::Register8::A;
         let a_value = self.registers.read_register8(A);
         self.registers.write_register8(A, a_value ^ immediate);
 
+        false
+    }
+
+    #[inline]
+    fn execute_ld_io_a<M: Memory>(&mut self, immediate: Immediate, memory: &M) -> bool {
+        self.registers
+            .write_register8(Register8::A, memory.read(0xFF00 + immediate as Address));
+        false
+    }
+
+    #[inline]
+    fn execute_ld_a_io<M: Memory>(&mut self, immediate: Immediate, memory: &mut M) -> bool {
+        memory.write(
+            0xFF00 + immediate as Address,
+            self.registers.read_register8(Register8::A),
+        );
+        false
+    }
+
+    #[inline]
+    fn execute_ld_r_r(&mut self, register_a: Register8, register_b: Register8) -> bool {
+        let src = self.registers.read_register8(register_a);
+        self.registers.write_register8(register_b, src);
+        false
+    }
+
+    #[inline]
+    fn execute_ld_a_rr<M: Memory>(&mut self, register: Register16, memory: &mut M) -> bool {
+        let val = self.registers.read_register8(Register8::A);
+        let address = self.registers.read_register16(register);
+        memory.write(address, val);
+        false
+    }
+
+    #[inline]
+    fn execute_call_ii<M: Memory>(&mut self, address: Address, memory: &mut M) -> bool {
+        self.registers.sp -= 2;
+        let sp = self.registers.sp;
+        memory.write_double(sp, self.registers.pc);
+        self.registers.pc = address;
+        false
+    }
+
+    #[inline]
+    fn execute_inc_rr(&mut self, register: Register16) -> bool {
+        let val = self.registers.read_register16(register);
+        self.registers.write_register16(register, val + 1);
+        false
+    }
+
+    #[inline]
+    fn execute_cp_a_i(&mut self, immediate: Immediate) -> bool {
+        let a = self.registers.read_register8(Register8::A);
+        self.registers.write_flag(Flag::Zf, a == immediate);
+        self.registers.write_flag(Flag::Nf, true);
+        self.registers.write_flag(Flag::Hf, true); // TODO: this is wrong
+        self.registers.write_flag(Flag::Cf, a < immediate);
+        false
+    }
+
+    #[inline]
+    fn execute_push_rr<M: Memory>(&mut self, register: Register16, memory: &mut M) -> bool {
+        self.registers.pc -= 2;
+        let val = self.registers.read_register16(register);
+        memory.write_double(self.registers.pc, val);
+        false
+    }
+
+    #[inline]
+    fn execute_inc_r(&mut self, register: Register8) -> bool {
+        let val = self.registers.read_register8(register);
+        self.registers.write_register8(register, val + 1);
+        false
+    }
+
+    #[inline]
+    fn execute_dec_rr(&mut self, register: Register16) -> bool {
+        let val = self.registers.read_register16(register);
+        self.registers.write_register16(register, val - 1);
+        false
+    }
+
+    #[inline]
+    fn execute_dec_r(&mut self, register: Register8) -> bool {
+        let val = self.registers.read_register8(register);
+        self.registers.write_register8(register, val - 1);
         false
     }
 }

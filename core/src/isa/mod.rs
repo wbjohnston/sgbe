@@ -105,7 +105,7 @@ pub enum Instruction {
     LdRrIi(Register16, Immediate16),
     LdSpHl,
     LdIiSp(Immediate16),
-    Push(Register16),
+    PushRr(Register16),
     Pop(Register16),
 
     // 8-bit ALU instructions
@@ -273,7 +273,7 @@ impl Instruction {
 
             LdSpHl => 8,
 
-            Push(_) => 16,
+            PushRr(_) => 16,
 
             Pop(_) => 12,
 
@@ -443,7 +443,7 @@ impl Instruction {
             LdHlR(_) => 1,
             LdHlI(_) => 2,
             LdARr(_) => 1,
-            LdAI(_) => 1,
+            LdAI(_) => 2,
             LdRrA(_) => 1,
             LdIA(_) => 1,
             LdAIo(_) => 1,
@@ -463,7 +463,7 @@ impl Instruction {
 
             LdSpHl => 1,
 
-            Push(_) => 1,
+            PushRr(_) => 1,
 
             Pop(_) => 1,
 

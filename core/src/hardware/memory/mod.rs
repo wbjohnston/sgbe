@@ -10,7 +10,7 @@
 
 pub mod addresses;
 
-use hardware::pack_words;
+use hardware::{pack_words, split_doubleword};
 use isa::{Address, DoubleWord, Word};
 
 /// Number of bytes in one Kilobyte
@@ -24,13 +24,20 @@ type Memory16KbInner = Box<[Word; KB * 16]>;
 
 type Memory32KbInner = Box<[Word; KB * 32]>;
 
-/// A bus to read and write data
+/// A piece of memory to read and write data
 pub trait Memory {
     /// Read a value from an address
     fn read(&self, address: Address) -> Word;
 
     /// Write a value to an address
     fn write(&mut self, address: Address, value: Word);
+
+    /// Write a double to an address
+    fn write_double(&mut self, address: Address, value: DoubleWord) {
+        let (lo, hi) = split_doubleword(value);
+        self.write(address, lo);
+        self.write(address, hi);
+    }
 
     /// Read a `DoubleWord`
     fn read_double(&self, address: Address) -> DoubleWord {
@@ -79,11 +86,11 @@ impl Memory8Kb {
 
 impl Memory for Memory8Kb {
     fn read(&self, address: Address) -> Word {
-        unimplemented!()
+        self.0[address as usize]
     }
 
     fn write(&mut self, address: Address, value: Word) {
-        unimplemented!()
+        self.0[address as usize] = value;
     }
 }
 
@@ -99,11 +106,11 @@ impl Memory16Kb {
 
 impl Memory for Memory16Kb {
     fn read(&self, address: Address) -> Word {
-        unimplemented!()
+        self.0[address as usize]
     }
 
     fn write(&mut self, address: Address, value: Word) {
-        unimplemented!()
+        self.0[address as usize] = value;
     }
 }
 
@@ -118,10 +125,10 @@ impl Memory32Kb {
 
 impl Memory for Memory32Kb {
     fn read(&self, address: Address) -> Word {
-        unimplemented!()
+        self.0[address as usize]
     }
 
     fn write(&mut self, address: Address, value: Word) {
-        unimplemented!()
+        self.0[address as usize] = value;
     }
 }
