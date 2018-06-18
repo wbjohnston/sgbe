@@ -6,24 +6,25 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-//! Picture processing unit stuff
+//! Picture processing unit type
 
-use super::mmu::SWRAM;
+use super::mmu::Swram;
 use super::MMU;
 use hardware::bios::Bios;
 
-/// A Gameboy pictue processes unit
+/// A Gameboy picture processing unit
 #[derive(Debug, Clone, Copy)]
 pub struct PPU;
 
 impl PPU {
-    /// Create a new pixel processing unit
+    /// Create a new `PPU`
     pub fn new() -> PPU {
         PPU {}
     }
 
-    pub fn emulate<S: SWRAM, B: Bios>(&mut self, cycles: usize, mmu: &mut MMU<S, B>) {
+    /// Emulate the function of a `PPU` over a given number of cycles
+    pub fn emulate<S: Swram, B: Bios>(&mut self, cycles: usize, mmu: &mut MMU<S, B>) {
         debug!("GPU not yet implemented")
-        // unimplemented!()
+        // TODO: implement PPU::emulate
     }
 }

@@ -29,7 +29,7 @@ const DEFAULT_L_VALUE: Word = 0x00;
 const DEFAULT_SP_VALUE: DoubleWord = 0x0000;
 const DEFAULT_PC_VALUE: DoubleWord = 0x0000;
 
-// TODO: (will) implement flag register as bitflags
+// TODO:  implement flag register as bitflags
 
 /// A Gameboy CPU register file
 #[derive(Debug, Copy, Clone)]

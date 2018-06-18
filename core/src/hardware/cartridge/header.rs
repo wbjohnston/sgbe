@@ -6,7 +6,7 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-//! Cartridge header types
+//! Gameboy cartridge header types
 
 use isa::Word;
 
@@ -24,7 +24,7 @@ pub enum CartridgeKind {
     MMM01,
     MMM01Ram,
     MMM01RamBattery,
-    MBC3TimerBatery,
+    MBC3TimerBattery,
     MBC3TimerRamBattery,
     MBC3,
     MBC3Ram,
@@ -58,7 +58,7 @@ impl From<Word> for CartridgeKind {
             0x0B => MMM01,
             0x0C => MMM01Ram,
             0x0D => MMM01RamBattery,
-            0x0F => MBC3TimerBatery,
+            0x0F => MBC3TimerBattery,
             0x10 => MBC3TimerRamBattery,
             0x11 => MBC3,
             0x12 => MBC3Ram,

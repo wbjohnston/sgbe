@@ -6,12 +6,19 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-//! A gameboy timer
+//! Gameboy timer type
 
+/// A Gameboy timer
 #[derive(Debug, Copy, Clone)]
 pub struct Timer;
 
 impl Timer {
+    /// Create a new `Timer`
+    pub fn new() -> Self {
+        Timer {}
+    }
+
+    /// Emulate the function of a timer over a given number of cycles
     pub fn emulate(&mut self, cycles: usize) {
         unimplemented!()
     }

@@ -14,8 +14,8 @@ extern crate quickcheck;
 
 #[macro_use]
 extern crate log;
-#[macro_use]
-extern crate smallvec;
+// #[macro_use]
+// extern crate smallvec;
 
 #[macro_use]
 extern crate failure;

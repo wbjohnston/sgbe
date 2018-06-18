@@ -175,7 +175,7 @@ impl CPU {
     fn execute_bit_i_r(&mut self, immediate: Immediate, register: Register8) -> bool {
         debug!("Instruction not implemented");
 
-        // TODO: (will) implement me
+        // TODO:  implement me
         false
     }
 

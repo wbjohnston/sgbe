@@ -244,7 +244,7 @@ impl Instruction {
     /// Assumes the instruction is not branching
     pub fn cycles(&self) -> u8 {
         use self::Instruction::*;
-        // TODO: (will) implement Instruction::cycles()
+        // TODO:  implement Instruction::cycles()
         match *self {
             // 8-bit load instructions
             LdRR(_, _) => 4,
@@ -302,10 +302,6 @@ impl Instruction {
             XorAI(_) => 8,
             XorAHl => 8,
 
-            XorAR(_) => 4,
-            XorAI(_) => 8,
-            XorAHl => 8,
-
             OrAR(_) => 4,
             OrAI(_) => 8,
             OrAHl => 8,
@@ -333,7 +329,7 @@ impl Instruction {
             DecRr(_) => 8,
 
             LdHlSp(_) => 12,
-            LdIiSp(_) => unimplemented!(), // TODO: (will) implement me
+            LdIiSp(_) => unimplemented!(), // TODO:  implement me
 
             // Shift and rotate commands
             Rlca => 4,
@@ -492,10 +488,6 @@ impl Instruction {
             XorAI(_) => 2,
             XorAHl => 1,
 
-            XorAR(_) => 1,
-            XorAI(_) => 2,
-            XorAHl => 1,
-
             OrAR(_) => 1,
             OrAI(_) => 2,
             OrAHl => 1,
@@ -523,7 +515,7 @@ impl Instruction {
             DecRr(_) => 1,
 
             LdHlSp(_) => 2,
-            LdIiSp(_) => unimplemented!(), // TODO: (will) implement me
+            LdIiSp(_) => unimplemented!(), // TODO:  implement me
 
             // Shift and rotate commands
             Rlca => 1,

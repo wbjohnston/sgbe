@@ -7,7 +7,7 @@
 // except according to those terms.
 
 pub mod swram;
-pub use self::swram::SWRAM;
+pub use self::swram::Swram;
 
 use system::Buttons;
 
@@ -19,7 +19,7 @@ use hardware::Cartridge;
 use isa::{Address, Word};
 
 /// A Gameboy Memory management unit
-pub struct MMU<S: SWRAM, B: Bios> {
+pub struct MMU<S: Swram, B: Bios> {
     bios: B,
     cartridge: Option<Cartridge>,
     vram: Memory8Kb,         // video ram
@@ -30,7 +30,7 @@ pub struct MMU<S: SWRAM, B: Bios> {
     hram: [Word; HRAM_SIZE], // high ram
 }
 
-impl<S: SWRAM + Default, B: Bios> MMU<S, B> {
+impl<S: Swram + Default, B: Bios> MMU<S, B> {
     /// Crete a new MMMU with initialized io ram
     pub fn new(bios: B) -> Self {
         let oam = [0; OAM_SIZE];
@@ -50,7 +50,7 @@ impl<S: SWRAM + Default, B: Bios> MMU<S, B> {
     }
 }
 
-impl<S: SWRAM, B: Bios> MMU<S, B> {
+impl<S: Swram, B: Bios> MMU<S, B> {
     pub fn vram(&self) -> &Memory8Kb {
         &self.vram
     }
@@ -110,7 +110,7 @@ impl<S: SWRAM, B: Bios> MMU<S, B> {
     }
 }
 
-impl<S: SWRAM, B: Bios> Memory for MMU<S, B> {
+impl<S: Swram, B: Bios> Memory for MMU<S, B> {
     /// Read a word from memory
     fn read(&self, address: Address) -> Word {
         match address {

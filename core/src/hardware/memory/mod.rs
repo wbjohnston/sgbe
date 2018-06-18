@@ -74,6 +74,12 @@ impl Memory4Kb {
     }
 }
 
+impl Default for Memory4Kb {
+    fn default() -> Self {
+        Memory4Kb(Box::new([0; 4 * KB]))
+    }
+}
+
 /// A 8KB memory bank
 #[derive(Clone)]
 pub struct Memory8Kb(Memory8KbInner);
@@ -91,6 +97,12 @@ impl Memory for Memory8Kb {
 
     fn write(&mut self, address: Address, value: Word) {
         self.0[address as usize] = value;
+    }
+}
+
+impl Default for Memory8Kb {
+    fn default() -> Self {
+        Memory8Kb(Box::new([0; 8 * KB]))
     }
 }
 
@@ -114,6 +126,12 @@ impl Memory for Memory16Kb {
     }
 }
 
+impl Default for Memory16Kb {
+    fn default() -> Self {
+        Memory16Kb(Box::new([0; 16 * KB]))
+    }
+}
+
 #[derive(Clone)]
 pub struct Memory32Kb(Memory32KbInner);
 
@@ -130,5 +148,11 @@ impl Memory for Memory32Kb {
 
     fn write(&mut self, address: Address, value: Word) {
         self.0[address as usize] = value;
+    }
+}
+
+impl Default for Memory32Kb {
+    fn default() -> Self {
+        Memory32Kb(Box::new([0; 32 * KB]))
     }
 }

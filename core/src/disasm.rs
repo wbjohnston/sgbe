@@ -21,7 +21,6 @@ pub fn decode<M: Memory>(memory: &M, address: Address) -> Instruction {
     /// Decode a `0xCB` prefixed instruction
     #[inline(always)]
     fn decode_cb<B: Memory>(address: Address, memory: &B) -> Instruction {
-        let next_address = address + 1;
         match memory.read(address) {
             0x00 => RlcR(B),
             0x01 => RlcR(C),
@@ -294,7 +293,7 @@ pub fn decode<M: Memory>(memory: &M, address: Address) -> Instruction {
             0xFD => SetIR(7, L),
             0xFE => SetIHl(7),
             0xFF => SetIR(7, A),
-            _ => unimplemented!(),
+            _ => unreachable!(),
         }
     }
 

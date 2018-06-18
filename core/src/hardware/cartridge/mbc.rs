@@ -6,15 +6,15 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-//! Memory bank controllers
+//! Memory bank controller types
 
 use std::fmt::{self, Debug};
 
+use super::header::CartridgeKind;
 use failure::Error;
 use hardware::memory::{Memory, Switchable};
 use isa::{Address, Word};
 
-const CATRIDGE_TYPE_ADDR: usize = 0x147;
 
 /// Memory bank controller
 #[derive(Clone)]
@@ -28,93 +28,113 @@ pub enum MBC {
 }
 
 impl MBC {
-    /// Parse a memory bank controller from a stream of bytes, returning an error if any occured
-    pub fn try_parse_bytes<'a>(bytes: &'a [u8]) -> Result<Self, Error> {
-        // TODO: (will) implement me
-        unimplemented!()
-    }
 
-    fn try_parse_bytes_fixed<'a>(bytes: &'a [u8]) -> Result<Self, Error> {
+    pub fn try_parse_bytes_fixed<'a>(bytes: &'a [u8]) -> Result<Self, Error> {
         unimplemented!()
     }
 
     fn read_fixed(&self, address: Address) -> Word {
-        // TODO: (will) implement me
+        // TODO:  implement me
         unimplemented!()
     }
 
     fn write_fixed(&mut self, address: Address, value: Word) {
-        // TODO: (will) implement me
+        // TODO:  implement me
         unimplemented!()
     }
 
-    fn try_parse_bytes_huc1<'a>(bytes: &'a [u8]) -> Result<Self, Error> {
+    fn switch_bank_fixed(&mut self, bank_idx: u8) {
+        /* nop */
+    }
+
+    pub fn try_parse_bytes_huc1<'a>(bytes: &'a [u8]) -> Result<Self, Error> {
         unimplemented!()
     }
 
     fn read_huc1(&self, address: Address) -> Word {
-        // TODO: (will) implement me
+        // TODO:  implement me
         unimplemented!()
     }
 
     fn write_huc1(&mut self, address: Address, value: Word) {
-        // TODO: (will) implement me
+        // TODO:  implement me
         unimplemented!()
     }
 
-    fn try_parse_bytes_mbc1<'a>(bytes: &'a [u8]) -> Result<Self, Error> {
+    fn switch_bank_huc1(&mut self, bank_idx: u8) {
+        unimplemented!()
+    }
+
+    pub fn try_parse_bytes_mbc1<'a>(bytes: &'a [u8]) -> Result<Self, Error> {
         unimplemented!()
     }
 
     fn read_mbc1(&self, address: Address) -> Word {
-        // TODO: (will) implement me
+        // TODO:  implement me
         unimplemented!()
     }
 
     fn write_mbc1(&mut self, address: Address, value: Word) {
-        // TODO: (will) implement me
+        // TODO:  implement me
         unimplemented!()
     }
 
-    fn try_parse_bytes_mbc2<'a>(bytes: &'a [u8]) -> Result<Self, Error> {
+    fn switch_bank_mbc1(&mut self, bank_idx: u8) {
+        unimplemented!()
+    }
+
+    pub fn try_parse_bytes_mbc2<'a>(bytes: &'a [u8]) -> Result<Self, Error> {
         unimplemented!()
     }
 
     fn read_mbc2(&self, address: Address) -> Word {
-        // TODO: (will) implement me
+        // TODO:  implement me
         unimplemented!()
     }
 
     fn write_mbc2(&mut self, address: Address, value: Word) {
-        // TODO: (will) implement me
+        // TODO:  implement me
         unimplemented!()
     }
 
-    fn try_parse_bytes_mbc3<'a>(bytes: &'a [u8]) -> Result<Self, Error> {
+    fn switch_bank_mbc2(&mut self, bank_idx: u8) {
+        unimplemented!()
+    }
+
+    pub fn try_parse_bytes_mbc3<'a>(bytes: &'a [u8]) -> Result<Self, Error> {
         unimplemented!()
     }
 
     fn read_mbc3(&self, address: Address) -> Word {
-        // TODO: (will) implement me
+        // TODO:  implement me
         unimplemented!()
     }
 
     fn write_mbc3(&mut self, address: Address, value: Word) {
-        // TODO: (will) implement me
+        // TODO:  implement me
         unimplemented!()
     }
 
-    fn try_parse_bytes_mbc5<'a>(bytes: &'a [u8]) -> Result<Self, Error> {
+    fn switch_bank_mbc3(&mut self, bank_idx: u8) {
+        unimplemented!()
+    }
+
+    pub fn try_parse_bytes_mbc5<'a>(bytes: &'a [u8]) -> Result<Self, Error> {
         unimplemented!()
     }
 
     fn read_mbc5(&self, address: Address) -> Word {
-        // TODO: (will) implement me
+        // TODO:  implement me
         unimplemented!()
     }
 
     fn write_mbc5(&mut self, address: Address, value: Word) {
-        // TODO: (will) implement me
+        // TODO:  implement me
+        unimplemented!()
+    }
+
+    fn switch_bank_mbc5(&mut self, bank_idx: u8) {
+        // TODO:  implement me
         unimplemented!()
     }
 }
@@ -148,14 +168,13 @@ impl Memory for MBC {
 impl Switchable for MBC {
     fn switch_bank(&mut self, bank_idx: u8) {
         use self::MBC::*;
-        // TODO: (will) implement me
         match *self {
-            Fixed { .. } => unimplemented!(),
-            HuC1 { .. } => unimplemented!(),
-            MBC1 { .. } => unimplemented!(),
-            MBC2 { .. } => unimplemented!(),
-            MBC3 { .. } => unimplemented!(),
-            MBC5 { .. } => unimplemented!(),
+            Fixed { .. } => self.switch_bank_fixed(bank_idx),
+            HuC1 { .. } => self.switch_bank_huc1(bank_idx),
+            MBC1 { .. } => self.switch_bank_mbc1(bank_idx),
+            MBC2 { .. } => self.switch_bank_mbc2(bank_idx),
+            MBC3 { .. } => self.switch_bank_mbc3(bank_idx),
+            MBC5 { .. } => self.switch_bank_mbc5(bank_idx),
         }
     }
 }

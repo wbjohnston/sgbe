@@ -13,10 +13,10 @@ use hardware::bios::{Bios, CgbBios, GbBios};
 
 use hardware::cartridge::Cartridge;
 use hardware::cpu::Registers;
-use hardware::memory::{Memory, Memory4Kb, Memory8Kb};
-use hardware::mmu::swram::{self, SWRAM};
+use hardware::memory::Memory8Kb;
+use hardware::mmu::swram::{self, Swram};
 use hardware::{APU, CPU, MMU, PPU};
-use isa::{Address, Word};
+use isa::Address;
 
 /// Gameboy
 pub type Gb = System<swram::Fixed, GbBios>;
@@ -28,7 +28,6 @@ pub type Cgb = System<swram::Banked, CgbBios>;
 pub type Buttons = EnumSet<Button>;
 
 /// State of the Dpad
-// #[derive(Debug, Copy, Clone)]
 enum_set_type! {
     pub enum Button {
         A,
@@ -43,7 +42,7 @@ enum_set_type! {
 }
 
 /// A Gameboy sytem
-pub struct System<S: SWRAM, B: Bios> {
+pub struct System<S: Swram, B: Bios> {
     input: Buttons,
     cpu: CPU,
     mmu: MMU<S, B>,
@@ -51,7 +50,7 @@ pub struct System<S: SWRAM, B: Bios> {
     apu: APU,
 }
 
-impl<S: SWRAM + Default, B: Bios> System<S, B> {
+impl<S: Swram + Default, B: Bios> System<S, B> {
     /// Create a new system with no loaded catridge
     pub fn new(bios: B) -> Self {
         let mmu = MMU::<S, B>::new(bios);
@@ -65,7 +64,7 @@ impl<S: SWRAM + Default, B: Bios> System<S, B> {
     }
 }
 
-impl<S: SWRAM, B: Bios> System<S, B> {
+impl<S: Swram, B: Bios> System<S, B> {
     /// Load a catridge into the system
     pub fn load(&mut self, cartridge: Cartridge) {
         self.mmu.load(cartridge)
@@ -89,7 +88,7 @@ impl<S: SWRAM, B: Bios> System<S, B> {
 
     /// Emulate the system taking a specified number of steps
     pub fn emulate(&mut self, cycles: usize) {
-        let mut cycles = cycles; // TODO: (will) what happens when we get cycles not a multiple of 4?
+        let mut cycles = cycles; // TODO:  what happens when we get cycles not a multiple of 4?
         while cycles > 0 {
             cycles -= self.step() as usize;
         }
