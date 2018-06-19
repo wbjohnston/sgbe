@@ -151,6 +151,12 @@ impl Memory for Memory32Kb {
     }
 }
 
+impl From<[u8; KB * 32]> for Memory32Kb {
+    fn from(bytes: [u8; KB * 32]) -> Self {
+        Memory32Kb(Box::new(bytes))
+    }
+}
+
 impl Default for Memory32Kb {
     fn default() -> Self {
         Memory32Kb(Box::new([0; 32 * KB]))

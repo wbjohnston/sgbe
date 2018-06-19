@@ -33,9 +33,7 @@ impl Cartridge {
     pub fn try_parse_bytes(bytes: &[u8]) -> Result<Self, Error> {
         use self::CartridgeKind::*;
         // don't try to parse if a header can't even be read
-        if !Self::header_is_valid(bytes) {
-            return Err(ParsingError::InvalidHeader.into());
-        }
+        Self::validate_header(bytes)?;
 
         let catridge_type = bytes[CATRIDGE_TYPE_ADDR].into();
 
@@ -70,13 +68,15 @@ impl Cartridge {
     }
 
     /// Returns true if the given byte array may contain a valid header
-    fn header_is_valid(bytes: &[u8]) -> bool {
+    fn validate_header(bytes: &[u8]) -> Result<(), Error> {
         // basic check. make sure there are enough bytes to form a header
         if bytes.len() < 0x14 {
-            return false;
+            return Err(ParsingError::InvalidHeaderLength {
+                length: bytes.len(),
+            }.into());
         }
 
-        true
+        Ok(())
     }
 }
 
@@ -93,6 +93,6 @@ impl Memory for Cartridge {
 /// Errors that can occur during cartridge parsing
 #[derive(Fail, Debug, Clone)]
 pub enum ParsingError {
-    #[fail(display = "Header invalid")]
-    InvalidHeader,
+    #[fail(display = "Header invalid length {}", length)]
+    InvalidHeaderLength { length: usize },
 }

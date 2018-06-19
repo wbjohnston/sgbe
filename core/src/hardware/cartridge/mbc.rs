@@ -10,44 +10,54 @@
 
 use std::fmt::{self, Debug};
 
-use super::header::CartridgeKind;
 use failure::Error;
-use hardware::memory::{Memory, Switchable};
+use hardware::memory::{Memory, Memory32Kb, Switchable};
 use isa::{Address, Word};
-
 
 /// Memory bank controller
 #[derive(Clone)]
 pub enum MBC {
-    Fixed {},
-    HuC1 {},
-    MBC1 {},
-    MBC2 {},
-    MBC3 {},
-    MBC5 {},
+    Fixed { rom0: Memory32Kb },
+    HuC1 { rom0: Memory32Kb },
+    MBC1 { rom0: Memory32Kb },
+    MBC2 { rom0: Memory32Kb },
+    MBC3 { rom0: Memory32Kb },
+    MBC5 { rom0: Memory32Kb },
 }
 
 impl MBC {
+    pub fn try_parse_bytes_fixed(bytes: &[u8]) -> Result<Self, Error> {
+        fn validate_fixed(bytes: &[u8]) -> Result<(), Error> {
+            // TODO: implement fixed validation
+            Ok(())
+        }
 
-    pub fn try_parse_bytes_fixed<'a>(bytes: &'a [u8]) -> Result<Self, Error> {
-        unimplemented!()
+        validate_fixed(bytes)?;
+
+        Ok(MBC::Fixed {
+            rom0: Self::try_parse_rom0(bytes)?,
+        })
     }
 
     fn read_fixed(&self, address: Address) -> Word {
-        // TODO:  implement me
-        unimplemented!()
+        match *self {
+            MBC::Fixed { ref rom0 } => rom0.read(address),
+            _ => unreachable!(),
+        }
     }
 
     fn write_fixed(&mut self, address: Address, value: Word) {
-        // TODO:  implement me
-        unimplemented!()
+        match *self {
+            MBC::Fixed { ref mut rom0 } => rom0.write(address, value),
+            _ => unreachable!(),
+        }
     }
 
-    fn switch_bank_fixed(&mut self, bank_idx: u8) {
+    fn switch_bank_fixed(&mut self, _bank_idx: u8) {
         /* nop */
     }
 
-    pub fn try_parse_bytes_huc1<'a>(bytes: &'a [u8]) -> Result<Self, Error> {
+    pub fn try_parse_bytes_huc1(bytes: &[u8]) -> Result<Self, Error> {
         unimplemented!()
     }
 
@@ -65,7 +75,7 @@ impl MBC {
         unimplemented!()
     }
 
-    pub fn try_parse_bytes_mbc1<'a>(bytes: &'a [u8]) -> Result<Self, Error> {
+    pub fn try_parse_bytes_mbc1(bytes: &[u8]) -> Result<Self, Error> {
         unimplemented!()
     }
 
@@ -83,7 +93,7 @@ impl MBC {
         unimplemented!()
     }
 
-    pub fn try_parse_bytes_mbc2<'a>(bytes: &'a [u8]) -> Result<Self, Error> {
+    pub fn try_parse_bytes_mbc2(bytes: &[u8]) -> Result<Self, Error> {
         unimplemented!()
     }
 
@@ -101,7 +111,7 @@ impl MBC {
         unimplemented!()
     }
 
-    pub fn try_parse_bytes_mbc3<'a>(bytes: &'a [u8]) -> Result<Self, Error> {
+    pub fn try_parse_bytes_mbc3(bytes: &[u8]) -> Result<Self, Error> {
         unimplemented!()
     }
 
@@ -119,7 +129,7 @@ impl MBC {
         unimplemented!()
     }
 
-    pub fn try_parse_bytes_mbc5<'a>(bytes: &'a [u8]) -> Result<Self, Error> {
+    pub fn try_parse_bytes_mbc5(bytes: &[u8]) -> Result<Self, Error> {
         unimplemented!()
     }
 
@@ -135,6 +145,10 @@ impl MBC {
 
     fn switch_bank_mbc5(&mut self, bank_idx: u8) {
         // TODO:  implement me
+        unimplemented!()
+    }
+
+    fn try_parse_rom0(bytes: &[u8]) -> Result<Memory32Kb, Error> {
         unimplemented!()
     }
 }
