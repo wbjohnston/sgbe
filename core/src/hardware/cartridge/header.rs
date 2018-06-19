@@ -8,9 +8,65 @@
 
 //! Gameboy cartridge header types
 
-use isa::Word;
+use isa::{Address, Word};
 
-/// A catride kind
+/// Start of game entry point multi-byte header field
+pub const ENTRY_POINT_OFFSET: Address = 0x100;
+
+/// End of game entry point multi-byte header field
+pub const ENTRY_POINT_END: Address = 0x103;
+
+/// Start of nintendo logo bitmap multi-byte header field
+pub const NINTENDO_LOGO_OFFSET: Address = 0x104;
+
+/// End of nintendo logo bitmap multi-byte header field
+pub const NINTENDO_LOGO_END: Address = 0x133;
+
+/// Start of title multi-byte header field
+pub const TITLE_OFFSET: Address = 0x134;
+/// End of title multi-byte header field
+pub const TITLE_END: Address = 0x143;
+
+/// Color gameboy header flag address
+pub const CGB_FLAG_ADDRESS: Address = 0x143;
+
+/// Start of new licensee code multi-byte header field
+pub const NEW_LICENSEE_CODE_OFFSET: Address = 0x144;
+
+/// End of new licensee code multi-byte header field
+pub const NEW_LICENSEE_CODE_END: Address = 0x145;
+
+/// Super gameboy feature header flag address
+pub const SGB_FLAG_ADDRESS: Address = 0x146;
+
+/// Cartridge type header flag address
+pub const CATRIDGE_TYPE_ADDRESS: Address = 0x147;
+
+/// Rom size header flag address
+pub const ROM_SIZE_ADDRESS: Address = 0x148;
+
+/// Ram size header flag address
+pub const RAM_SIZE_ADDRESS: Address = 0x149;
+
+/// Desitation code header flag address
+pub const DESTINATION_CODE_ADDRESS: Address = 0x14A;
+
+/// Old licensee header flag address
+pub const OLD_LICENSEE_CODE_ADDRESS: Address = 0x14B;
+
+/// Version number of the game header field
+pub const MASK_ROM_VERSION_ADDRESS: Address = 0x14C;
+
+/// Checksum to verify the header header field
+pub const HEADER_CHECKSUM_ADDRESS: Address = 0x14D;
+
+/// Start of checksum to verify the contents of the cartridge multi-byte field
+pub const GLOBAL_CHECKSUM_OFFSET: Address = 0x14E;
+
+/// End of checksum to verify the contents of the cartridge multi-byte field
+pub const GLOBAL_CHECKSUM_END: Address = 0x14F;
+
+/// A cartridge kind
 #[derive(Debug, Clone, Copy)]
 pub enum CartridgeKind {
     RomOnly,
@@ -101,9 +157,8 @@ impl CartridgeKind {
     pub fn has_timer(&self) -> bool {
         use self::CartridgeKind::*;
         match *self {
-            MBC3TimerBattery
-            | MBC3TimerRamBattery => true,
-            _ => false
+            MBC3TimerBattery | MBC3TimerRamBattery => true,
+            _ => false,
         }
     }
 }

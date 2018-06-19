@@ -71,7 +71,11 @@ impl Cartridge {
 
     /// Returns true if the given byte array may contain a valid header
     fn header_is_valid(bytes: &[u8]) -> bool {
-        // TODO: implement header validation
+        // basic check. make sure there are enough bytes to form a header
+        if bytes.len() < 0x14 {
+            return false;
+        }
+
         true
     }
 }
