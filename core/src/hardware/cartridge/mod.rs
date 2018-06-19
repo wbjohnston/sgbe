@@ -32,6 +32,11 @@ pub struct Cartridge {
 impl Cartridge {
     pub fn try_parse_bytes(bytes: &[u8]) -> Result<Self, Error> {
         use self::CartridgeKind::*;
+        // don't try to parse if a header can't even be read
+        if !Self::header_is_valid(bytes) {
+            return Err(ParsingError::InvalidHeader.into());
+        }
+
         let catridge_type = bytes[CATRIDGE_TYPE_ADDR].into();
 
         let mbc = match catridge_type {
@@ -48,22 +53,13 @@ impl Cartridge {
             _ => unimplemented!(),
         }?;
 
-        let has_battery = match catridge_type {
-            MBC1RamBattery
-            | MBC2Battery
-            | MBC3TimerBattery
-            | MBC3TimerRamBattery
-            | MBC5RamBattery
-            | MBC5RumbleRamBattery
-            | MBC7SensorRumbleRamBattery
-            | HuC1RamBattery => true,
-            _ => false,
-        };
+        let has_battery = catridge_type.has_battery();
 
-        let timer = match catridge_type {
-            MBC3TimerBattery
-            | MBC3TimerRamBattery => Some(Timer::new()),
-            _ => None,
+        // make a timer if its required
+        let timer = if catridge_type.has_timer() {
+            Some(Timer::new())
+        } else {
+            None
         };
 
         Ok(Cartridge {
@@ -71,6 +67,12 @@ impl Cartridge {
             has_battery,
             timer,
         })
+    }
+
+    /// Returns true if the given byte array may contain a valid header
+    fn header_is_valid(bytes: &[u8]) -> bool {
+        // TODO: implement header validation
+        true
     }
 }
 
@@ -84,12 +86,7 @@ impl Memory for Cartridge {
     }
 }
 
-#[derive(Fail, Debug, Clone)]
-pub enum CartridgeError {
-    #[fail(display = "Failed to parse bytes into a valid catridge")]
-    ParsingError(ParsingError),
-}
-
+/// Errors that can occur during cartridge parsing
 #[derive(Fail, Debug, Clone)]
 pub enum ParsingError {
     #[fail(display = "Header invalid")]

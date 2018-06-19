@@ -10,7 +10,7 @@
 
 use isa::Word;
 
-/// Types of cartridges
+/// A catride kind
 #[derive(Debug, Clone, Copy)]
 pub enum CartridgeKind {
     RomOnly,
@@ -43,6 +43,7 @@ pub enum CartridgeKind {
     HuC1RamBattery,
 }
 
+// TODO: change this to try_from once the `TryFrom` trait is stabilized
 impl From<Word> for CartridgeKind {
     fn from(value: Word) -> Self {
         use self::CartridgeKind::*;
@@ -74,12 +75,40 @@ impl From<Word> for CartridgeKind {
             0xFD => BandaiTama5,
             0xFE => HuC3,
             0xFF => HuC1RamBattery,
-            _ => unimplemented!(),
+            _ => unreachable!(),
         }
     }
 }
 
-/// Size of catrdige Rom
+impl CartridgeKind {
+    /// Returns true if the cartridge kind has a battery
+    pub fn has_battery(&self) -> bool {
+        use self::CartridgeKind::*;
+        match *self {
+            MBC1RamBattery
+            | MBC2Battery
+            | MBC3TimerBattery
+            | MBC3TimerRamBattery
+            | MBC5RamBattery
+            | MBC5RumbleRamBattery
+            | MBC7SensorRumbleRamBattery
+            | HuC1RamBattery => true,
+            _ => false,
+        }
+    }
+
+    /// Returns true if the cartridge kind has a timer
+    pub fn has_timer(&self) -> bool {
+        use self::CartridgeKind::*;
+        match *self {
+            MBC3TimerBattery
+            | MBC3TimerRamBattery => true,
+            _ => false
+        }
+    }
+}
+
+/// A cartridge rom size flag value
 #[derive(Debug, Clone, Copy)]
 pub enum RomSize {
     Kb32,
@@ -96,6 +125,7 @@ pub enum RomSize {
     Mb1_5,
 }
 
+// TODO: change this to try_from once the `TryFrom` trait is stabilized
 impl From<Word> for RomSize {
     fn from(value: Word) -> Self {
         use self::RomSize::*;
@@ -112,12 +142,12 @@ impl From<Word> for RomSize {
             0x52 => Mb1_1,
             0x53 => Mb1_2,
             0x54 => Mb1_5,
-            _ => unimplemented!(),
+            _ => unreachable!(),
         }
     }
 }
 
-/// Catrdige RAM size
+/// A cartridge RAM size flag value
 #[derive(Debug, Clone, Copy)]
 pub enum RamSize {
     None,
@@ -128,6 +158,7 @@ pub enum RamSize {
     Kb64,
 }
 
+// TODO: change this to try_from once the `TryFrom` trait is stabilized
 impl From<Word> for RamSize {
     fn from(value: Word) -> Self {
         use self::RamSize::*;
@@ -138,25 +169,26 @@ impl From<Word> for RamSize {
             0x03 => Kb32,
             0x04 => Kb128,
             0x05 => Kb64,
-            _ => unimplemented!(),
+            _ => unreachable!(),
         }
     }
 }
 
-/// Catrdige destination locale
+/// A cartridge desintation flag value
 #[derive(Debug, Clone, Copy)]
 pub enum Destination {
     Japan,
     NotJapan,
 }
 
+// TODO: change this to try_from once the `TryFrom` trait is stabilized
 impl From<Word> for Destination {
     fn from(value: Word) -> Self {
         use self::Destination::*;
         match value {
             0x00 => Japan,
             0x01 => NotJapan,
-            _ => unimplemented!(),
+            _ => unreachable!(),
         }
     }
 }
