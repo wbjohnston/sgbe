@@ -27,12 +27,12 @@ pub enum MBC {
 
 impl MBC {
     pub fn try_parse_bytes_fixed(bytes: &[u8]) -> Result<Self, Error> {
-        fn validate_fixed(bytes: &[u8]) -> Result<(), Error> {
+        fn validate(bytes: &[u8]) -> Result<(), Error> {
             // TODO: implement fixed validation
             Ok(())
         }
 
-        validate_fixed(bytes)?;
+        validate(bytes)?;
 
         Ok(MBC::Fixed {
             rom0: Self::try_parse_rom0(bytes)?,
@@ -58,6 +58,13 @@ impl MBC {
     }
 
     pub fn try_parse_bytes_huc1(bytes: &[u8]) -> Result<Self, Error> {
+        fn validate(bytes: &[u8]) -> Result<(), Error> {
+            // TODO: implement fixed validation
+            Ok(())
+        }
+
+        validate(bytes)?;
+
         unimplemented!()
     }
 
@@ -76,6 +83,14 @@ impl MBC {
     }
 
     pub fn try_parse_bytes_mbc1(bytes: &[u8]) -> Result<Self, Error> {
+        fn validate(bytes: &[u8]) -> Result<(), Error> {
+            // TODO: implement fixed validation
+            Ok(())
+        }
+
+        validate(bytes)?;
+
+        // TODO: implement me
         unimplemented!()
     }
 
@@ -94,6 +109,14 @@ impl MBC {
     }
 
     pub fn try_parse_bytes_mbc2(bytes: &[u8]) -> Result<Self, Error> {
+        fn validate(bytes: &[u8]) -> Result<(), Error> {
+            // TODO: implement fixed validation
+            Ok(())
+        }
+
+        validate(bytes)?;
+
+        // TODO: implement me
         unimplemented!()
     }
 
@@ -112,6 +135,14 @@ impl MBC {
     }
 
     pub fn try_parse_bytes_mbc3(bytes: &[u8]) -> Result<Self, Error> {
+        fn validate(bytes: &[u8]) -> Result<(), Error> {
+            // TODO: implement fixed validation
+            Ok(())
+        }
+
+        validate(bytes)?;
+
+        // TODO: validate me
         unimplemented!()
     }
 
@@ -130,6 +161,14 @@ impl MBC {
     }
 
     pub fn try_parse_bytes_mbc5(bytes: &[u8]) -> Result<Self, Error> {
+        fn validate(bytes: &[u8]) -> Result<(), Error> {
+            // TODO: implement fixed validation
+            Ok(())
+        }
+
+        validate(bytes)?;
+
+        // TODO: implement me
         unimplemented!()
     }
 
@@ -149,7 +188,10 @@ impl MBC {
     }
 
     fn try_parse_rom0(bytes: &[u8]) -> Result<Memory32Kb, Error> {
-        unimplemented!()
+        // FIXME: bad alloc, maybe use cow?
+        let mut inner = [0; 1024 * 32];
+        inner.copy_from_slice(&bytes[0..1024 * 32]);
+        Ok(Memory32Kb::from(inner))
     }
 }
 
