@@ -17,12 +17,26 @@ use isa::{Address, Word};
 /// Memory bank controller
 #[derive(Clone)]
 pub enum MBC {
-    Fixed { rom0: Memory32Kb },
-    HuC1 { rom0: Memory32Kb },
-    MBC1 { rom0: Memory32Kb },
-    MBC2 { rom0: Memory32Kb },
-    MBC3 { rom0: Memory32Kb },
-    MBC5 { rom0: Memory32Kb },
+    // TODO: probably move rom0 to the cartridge iteself since it's not _actually_
+    // managed by the MBC
+    Fixed {
+        rom0: Memory32Kb,
+    },
+    HuC1 {
+        rom0: Memory32Kb, // TODO: add HuC1 fields
+    },
+    MBC1 {
+        rom0: Memory32Kb, // TODO: add MBC1 fields
+    },
+    MBC2 {
+        rom0: Memory32Kb, // TODO: add MBC2 fields
+    },
+    MBC3 {
+        rom0: Memory32Kb, // TODO: add MBC3 fields
+    },
+    MBC5 {
+        rom0: Memory32Kb, // TODO: add MBC5 fields
+    },
 }
 
 impl MBC {

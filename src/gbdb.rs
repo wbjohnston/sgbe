@@ -74,7 +74,10 @@ fn print_instruction<M: Memory>(memory: &M, address: Address) {
 
 fn main() -> Result<(), Error> {
     let bios = GbBios::from(*include_bytes!("../roms/gb_bios.bin"));
+    let rom = include_bytes!("../roms/tetris.gb");
+    let cartridge = Cartridge::try_parse_bytes(rom)?;
     let mut emulator = Gb::new(bios);
+    emulator.load(cartridge);
 
     // let input = "step\n".to_string();
     let mut input = String::new();

@@ -61,6 +61,12 @@ impl fmt::Debug for Fixed {
     }
 }
 
+impl Default for Fixed {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 /// Banked switchable work ram
 #[derive(Clone)]
 pub struct Banked {
@@ -112,5 +118,11 @@ impl fmt::Debug for Banked {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         // TODO: implement
         unimplemented!()
+    }
+}
+
+impl Default for Banked {
+    fn default() -> Self  {
+        Self::new()
     }
 }
