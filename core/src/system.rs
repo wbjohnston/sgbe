@@ -64,12 +64,12 @@ impl<S: Swram + Default> System<S> {
 }
 
 impl<S: Swram> System<S> {
-    /// Load a catridge into the system
-    pub fn load(&mut self, cartridge: Cartridge) {
+    /// Load a catridge into the system and return the old one if there was one
+    pub fn load(&mut self, cartridge: Cartridge) -> Option<Cartridge> {
         self.mmu.load(cartridge)
     }
 
-    /// Unload the current cartridge from the sytem
+    /// Unload the current cartridge, if there is one, and return it
     pub fn maybe_unload(&mut self) -> Option<Cartridge> {
         self.mmu.maybe_unload()
     }
@@ -89,7 +89,7 @@ impl<S: Swram> System<S> {
     pub fn emulate(&mut self, cycles: usize) {
         let mut cycles = cycles; // TODO:  what happens when we get cycles not a multiple of 4?
         while cycles > 0 {
-            cycles -= self.step() as usize;
+            cycles = cycles.saturating_sub(usize::from(self.step()));
         }
     }
 
@@ -114,10 +114,12 @@ impl<S: Swram> System<S> {
         self.cpu.registers()
     }
 
+    /// Return the current program counter
     pub fn pc(&self) -> Address {
         self.cpu.registers().pc
     }
 
+    /// Return a reference to the memory managment unit (MMU)
     pub fn mmu(&self) -> &Mmu<S> {
         &self.mmu
     }

@@ -9,6 +9,7 @@
 pub mod swram;
 pub use self::swram::Swram;
 
+use std::mem::replace;
 use system::Buttons;
 
 use hardware::memory::addresses::memory_map::*;
@@ -33,9 +34,9 @@ impl<S: Swram> Mmu<S> {
         &self.vram
     }
 
-    /// Load a cartridge into the MMU
-    pub fn load(&mut self, cartridge: Cartridge) {
-        self.cartridge = Some(cartridge);
+    /// Load a cartridge into the MMU and return the old one if there was one
+    pub fn load(&mut self, cartridge: Cartridge) -> Option<Cartridge> {
+        replace(&mut self.cartridge, Some(cartridge))
     }
 
     /// Unload the current catridge from the MMU and return it

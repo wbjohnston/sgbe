@@ -261,7 +261,7 @@ impl Cpu {
     fn execute_ld_a_io<M: Memory>(&mut self, immediate: Immediate8, memory: &mut M) -> bool {
         trace!("TODO: notate this correctly");
         memory.write(
-            0xFF00 + immediate as Address,
+            0xFF00 + Address::from(immediate),
             self.registers.read_register8(Register8::A),
         );
         false
