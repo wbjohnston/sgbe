@@ -14,8 +14,8 @@ pub use self::registers::Registers;
 use disasm::decode;
 use hardware::memory::Memory;
 use isa::{
-    Address, DoubleWord, Flag, Immediate, Immediate16, Instruction, Register16, Register8,
-    SignedImmediate, Word,
+    Address, DoubleWord, Flag, Immediate16, Immediate8, Instruction, Register16, Register8,
+    SignedImmediate8, Word,
 };
 
 pub const CYCLES_PER_SECOND: usize = 4_194_304;
@@ -149,19 +149,19 @@ impl CPU {
     }
 
     #[inline]
-    fn execute_ld_a_i(&mut self, immediate: Immediate) -> bool {
+    fn execute_ld_a_i(&mut self, immediate: Immediate8) -> bool {
         self.registers.a = immediate;
         false
     }
 
     #[inline]
-    fn execute_ld_r_i(&mut self, register: Register8, immediate: Immediate) -> bool {
+    fn execute_ld_r_i(&mut self, register: Register8, immediate: Immediate8) -> bool {
         self.registers.write_register8(register, immediate);
         false
     }
 
     #[inline]
-    fn exectue_jr_cond_s(&mut self, condition: Flag, offset: SignedImmediate) -> bool {
+    fn exectue_jr_cond_s(&mut self, condition: Flag, offset: SignedImmediate8) -> bool {
         if self.registers.read_flag(condition) {
             debug!("Instruction not implemented");
             true
@@ -172,7 +172,7 @@ impl CPU {
     }
 
     #[inline]
-    fn execute_bit_i_r(&mut self, immediate: Immediate, register: Register8) -> bool {
+    fn execute_bit_i_r(&mut self, immediate: Immediate8, register: Register8) -> bool {
         debug!("Instruction not implemented");
 
         // TODO:  implement me
@@ -222,7 +222,7 @@ impl CPU {
     }
 
     #[inline]
-    fn execute_xor_a_i(&mut self, immediate: Immediate) -> bool {
+    fn execute_xor_a_i(&mut self, immediate: Immediate8) -> bool {
         // TODO: need to set flags
         use self::Register8::A;
         let a_value = self.registers.read_register8(A);
@@ -232,14 +232,14 @@ impl CPU {
     }
 
     #[inline]
-    fn execute_ld_io_a<M: Memory>(&mut self, immediate: Immediate, memory: &M) -> bool {
+    fn execute_ld_io_a<M: Memory>(&mut self, immediate: Immediate8, memory: &M) -> bool {
         self.registers
             .write_register8(Register8::A, memory.read(0xFF00 + immediate as Address));
         false
     }
 
     #[inline]
-    fn execute_ld_a_io<M: Memory>(&mut self, immediate: Immediate, memory: &mut M) -> bool {
+    fn execute_ld_a_io<M: Memory>(&mut self, immediate: Immediate8, memory: &mut M) -> bool {
         memory.write(
             0xFF00 + immediate as Address,
             self.registers.read_register8(Register8::A),
@@ -279,7 +279,7 @@ impl CPU {
     }
 
     #[inline]
-    fn execute_cp_a_i(&mut self, immediate: Immediate) -> bool {
+    fn execute_cp_a_i(&mut self, immediate: Immediate8) -> bool {
         let a = self.registers.read_register8(Register8::A);
         self.registers.write_flag(Flag::Zf, a == immediate);
         self.registers.write_flag(Flag::Nf, true);

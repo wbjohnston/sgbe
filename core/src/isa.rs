@@ -9,7 +9,7 @@
 use std::fmt;
 
 /// A 8-bit, signed, immediate value
-pub type SignedImmediate = i8;
+pub type SignedImmediate8 = i8;
 
 /// A word
 pub type Word = u8;
@@ -21,13 +21,13 @@ pub type DoubleWord = u16;
 pub type Address = DoubleWord;
 
 /// An 8-bit, unsigned, immediate value
-pub type Immediate = Word;
+pub type Immediate8 = Word;
 
 /// A 16-bit, unsigned, immediate value
 pub type Immediate16 = DoubleWord;
 
 // An 8-bit register
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum Register8 {
     A,
     F,
@@ -58,7 +58,7 @@ impl fmt::Display for Register8 {
 }
 
 /// A 16-bit register
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum Register16 {
     AF,
     BC,
@@ -85,7 +85,7 @@ impl fmt::Display for Register16 {
 }
 
 /// A CPU flag
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum Flag {
     Zf,
     Nf,
@@ -119,20 +119,20 @@ impl fmt::Display for Flag {
 /// * `A`: the 8-bit `A` accumulator register
 /// * `Hl`: the `HL 16-bit register
 /// * `SP`: The 16-bit `SP`, stack pointer, register
-#[derive(Debug, Copy, Clone)]
+#[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum Instruction {
     // 8-bit load instructions
     LdRR(Register8, Register8),
-    LdRI(Register8, Immediate),
+    LdRI(Register8, Immediate8),
     LdRHl(Register8),
     LdHlR(Register8),
-    LdHlI(Immediate),
+    LdHlI(Immediate8),
     LdARr(Register16),
-    LdAI(Immediate),
+    LdAI(Immediate8),
     LdRrA(Register16),
-    LdIA(Immediate),
-    LdAIo(Immediate),
-    LdIoA(Immediate),
+    LdIA(Immediate8),
+    LdAIo(Immediate8),
+    LdIoA(Immediate8),
     LdIiA,
     LdAIoc,
     LdIocA,
@@ -152,35 +152,35 @@ pub enum Instruction {
 
     // 8-bit ALU instructions
     AddAR(Register8),
-    AddAI(Immediate),
+    AddAI(Immediate8),
     AddAHl,
 
     AdcAR(Register8),
-    AdcAI(Immediate),
+    AdcAI(Immediate8),
     AdcAHl,
 
     SubAR(Register8),
-    SubAI(Immediate),
+    SubAI(Immediate8),
     SubAHl,
 
     SbcAR(Register8),
-    SbcAI(Immediate),
+    SbcAI(Immediate8),
     SbcAHl,
 
     AndAR(Register8),
-    AndAI(Immediate),
+    AndAI(Immediate8),
     AndAHl,
 
     XorAR(Register8),
-    XorAI(Immediate),
+    XorAI(Immediate8),
     XorAHl,
 
     OrAR(Register8),
-    OrAI(Immediate),
+    OrAI(Immediate8),
     OrAHl,
 
     CpAR(Register8),
-    CpAI(Immediate),
+    CpAI(Immediate8),
     CpAHl,
 
     IncR(Register8),
@@ -194,10 +194,10 @@ pub enum Instruction {
 
     // 16-bit ALU instructions
     AddHlRr(Register16),
-    AddSpS(SignedImmediate),
+    AddSpS(SignedImmediate8),
     IncRr(Register16),
     DecRr(Register16),
-    LdHlSp(SignedImmediate),
+    LdHlSp(SignedImmediate8),
 
     // Rotate/shift commands
     Rlca,
@@ -233,14 +233,14 @@ pub enum Instruction {
     SrlHl,
 
     // Single-bit commands
-    BitIR(Immediate, Register8),
-    BitIHl(Immediate),
+    BitIR(Immediate8, Register8),
+    BitIHl(Immediate8),
 
-    SetIR(Immediate, Register8),
-    SetIHl(Immediate),
+    SetIR(Immediate8, Register8),
+    SetIHl(Immediate8),
 
-    ResIR(Immediate, Register8),
-    ResIHl(Immediate),
+    ResIR(Immediate8, Register8),
+    ResIHl(Immediate8),
 
     // Control commands
     Ccf,
@@ -262,8 +262,8 @@ pub enum Instruction {
     JpCondIi(Flag, Immediate16),
     JpHl,
 
-    JrS(SignedImmediate),
-    JrCondS(Flag, SignedImmediate),
+    JrS(SignedImmediate8),
+    JrCondS(Flag, SignedImmediate8),
 
     CallIi(Address),
     CallCondIi(Flag, Address),
@@ -273,7 +273,7 @@ pub enum Instruction {
 
     Reti,
 
-    Rst(Immediate),
+    Rst(Immediate8),
 
     // Undefined instruction
     Undefined(Word),
