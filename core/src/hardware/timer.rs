@@ -24,3 +24,10 @@ impl Timer {
         unimplemented!()
     }
 }
+
+impl Default for Timer {
+    fn default() -> Self {
+        // TODO: implement Default for timer
+        unimplemented!()
+    }
+}

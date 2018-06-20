@@ -6,10 +6,6 @@ authors = ["Will Johnston <wbjohnston@gmail.com>"]
 [workspace]
 members = ["core"]
 
-[lib]
-name = "common"
-path = "src/common.rs"
-
 [[bin]]
 name = "gbdb"
 path = "src/gbdb.rs"

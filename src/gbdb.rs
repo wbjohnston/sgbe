@@ -17,14 +17,11 @@ use core::system::Gb;
 #[macro_use]
 extern crate failure;
 
-extern crate common;
-use common::try_read_rom;
-
 use failure::Error;
 use std::fs;
-use std::io::{self, BufRead, BufReader, Read, Write};
+use std::io::{self, BufRead, BufReader, Write};
 
-const PS1: &'static str = "gbdb> ";
+const PS1: &str = "gbdb> ";
 
 #[derive(Debug, Copy, Clone)]
 enum Command {
@@ -54,12 +51,13 @@ fn parse_command(command: &str) -> Command {
 }
 
 fn print_memory<M: Memory>(memory: &M, base: Address, margin: usize) {
+    // FIXME: make this put the active memory address at the cente of the readout
     for addr in (0x00..0xFF_u8)
         .cycle()
         .skip((base) as usize)
         .take((margin * 2 + 1) as usize)
     {
-        let addr = addr as Address;
+        let addr = Address::from(addr);
         if addr == base {
             println!("[{:4x}] : {:x}", addr, memory.read(addr))
         } else {
@@ -87,7 +85,7 @@ fn main() -> Result<(), Error> {
     let mut stdin = BufReader::new(io::stdin());
     loop {
         let mut out_handle = stdout.lock();
-        out_handle.write(PS1.as_bytes())?;
+        out_handle.write_all(PS1.as_bytes())?;
         out_handle.flush()?;
 
         let len = stdin.read_line(&mut input)?;
@@ -102,7 +100,7 @@ fn main() -> Result<(), Error> {
             Command::ShowMemory => print_memory(emulator.mmu(), emulator.pc(), 5),
             Command::ShowInstruction => print_instruction(emulator.mmu(), last_pc),
             Command::Undefined => {
-                out_handle.write(b"Undefined command\n")?;
+                out_handle.write_all(b"Undefined command\n")?;
             }
             Command::Exit => break,
         }

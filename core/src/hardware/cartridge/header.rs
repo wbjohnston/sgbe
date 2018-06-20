@@ -138,9 +138,9 @@ impl From<Word> for CartridgeKind {
 
 impl CartridgeKind {
     /// Returns true if the cartridge kind has a battery
-    pub fn has_battery(&self) -> bool {
+    pub fn has_battery(self) -> bool {
         use self::CartridgeKind::*;
-        match *self {
+        match self {
             MBC1RamBattery
             | MBC2Battery
             | MBC3TimerBattery
@@ -154,9 +154,9 @@ impl CartridgeKind {
     }
 
     /// Returns true if the cartridge kind has a timer
-    pub fn has_timer(&self) -> bool {
+    pub fn has_timer(self) -> bool {
         use self::CartridgeKind::*;
-        match *self {
+        match self {
             MBC3TimerBattery | MBC3TimerRamBattery => true,
             _ => false,
         }

@@ -244,24 +244,24 @@ mod test {
         let mut registers = Registers::default();
 
         // Test zf
-        registers.write_flag(Zf, true);
-        assert!(registers.read_flag(Zf));
-        registers.write_flag(Zf, false);
-        assert!(!registers.read_flag(Zf));
+        registers.write_flag(Zero, true);
+        assert!(registers.read_flag(Zero));
+        registers.write_flag(Zero, false);
+        assert!(!registers.read_flag(Zero));
 
-        registers.write_flag(Nf, true);
-        assert!(registers.read_flag(Nf));
-        registers.write_flag(Nf, false);
-        assert!(!registers.read_flag(Nf));
+        registers.write_flag(AddSub, true);
+        assert!(registers.read_flag(AddSub));
+        registers.write_flag(AddSub, false);
+        assert!(!registers.read_flag(AddSub));
 
-        registers.write_flag(Hf, true);
-        assert!(registers.read_flag(Hf));
-        registers.write_flag(Hf, false);
-        assert!(!registers.read_flag(Hf));
+        registers.write_flag(HalfCarry, true);
+        assert!(registers.read_flag(HalfCarry));
+        registers.write_flag(HalfCarry, false);
+        assert!(!registers.read_flag(HalfCarry));
 
-        registers.write_flag(Cf, true);
-        assert!(registers.read_flag(Cf));
-        registers.write_flag(Cf, false);
-        assert!(!registers.read_flag(Cf));
+        registers.write_flag(Carry, true);
+        assert!(registers.read_flag(Carry));
+        registers.write_flag(Carry, false);
+        assert!(!registers.read_flag(Carry));
     }
 }

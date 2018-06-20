@@ -284,10 +284,10 @@ impl Instruction {
     ///
     /// # Notes
     /// Assumes the instruction is not branching
-    pub fn cycles(&self) -> u8 {
+    pub fn cycles(self) -> u8 {
         use self::Instruction::*;
         // TODO:  implement Instruction::cycles()
-        match *self {
+        match self {
             // 8-bit load instructions
             LdRR(_, _) => 4,
             LdRI(_, _) => 8,
@@ -456,9 +456,9 @@ impl Instruction {
     ///
     /// # Notes
     /// Non-branching instructions return the same value as `cycles` was called on it
-    pub fn cycles_on_branch(&self) -> u8 {
+    pub fn cycles_on_branch(self) -> u8 {
         use self::Instruction::*;
-        match *self {
+        match self {
             JpCondIi(_, _) => 16,
 
             JrCondS(_, _) => 12,
@@ -471,9 +471,9 @@ impl Instruction {
         }
     }
 
-    pub fn size(&self) -> u8 {
+    pub fn size(self) -> u8 {
         use self::Instruction::*;
-        match *self {
+        match self {
             // 8-bit load instructions
             LdRR(_, _) => 1,
             LdRI(_, _) => 2,

@@ -57,7 +57,7 @@ impl<S: Swram + Default, B: Bios> System<S, B> {
         System {
             input: Buttons::empty(),
             cpu: CPU::new(),
-            mmu: mmu,
+            mmu,
             gpu: PPU::new(),
             apu: APU::new(),
         }

@@ -38,14 +38,14 @@ impl<S: Swram + Default, B: Bios> MMU<S, B> {
         let hram = [0; HRAM_SIZE];
 
         Self {
-            bios: bios,
+            bios,
             cartridge: None,
             vram: Memory8Kb::new(),
             wram: Memory4Kb::new(),
             swram: S::default(),
-            oam: oam,
-            iom: iom,
-            hram: hram,
+            oam,
+            iom,
+            hram,
         }
     }
 }

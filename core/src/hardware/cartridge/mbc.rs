@@ -16,25 +16,25 @@ use isa::{Address, Word};
 
 /// Memory bank controller
 #[derive(Clone)]
-pub enum MBC {
+pub enum Mbc {
     HuC1 {
         // TODO: add HuC1 fields
     },
-    MBC1 {
+    Mbc1 {
         // TODO: add MBC1 fields
     },
-    MBC2 {
+    Mbc2 {
         // TODO: add MBC2 fields
     },
-    MBC3 {
+    Mbc3 {
         // TODO: add MBC3 fields
     },
-    MBC5 {
+    Mbc5 {
         // TODO: add MBC5 fields
     },
 }
 
-impl MBC {
+impl Mbc {
     pub fn try_parse_bytes_huc1(bytes: &[u8]) -> Result<Self, Error> {
         fn validate(bytes: &[u8]) -> Result<(), Error> {
             // TODO: implement fixed validation
@@ -167,44 +167,44 @@ impl MBC {
     }
 }
 
-impl Memory for MBC {
+impl Memory for Mbc {
     fn read(&self, address: Address) -> Word {
-        use self::MBC::*;
+        use self::Mbc::*;
         match *self {
             HuC1 { .. } => self.read_huc1(address),
-            MBC1 { .. } => self.read_mbc1(address),
-            MBC2 { .. } => self.read_mbc2(address),
-            MBC3 { .. } => self.read_mbc3(address),
-            MBC5 { .. } => self.read_mbc5(address),
+            Mbc1 { .. } => self.read_mbc1(address),
+            Mbc2 { .. } => self.read_mbc2(address),
+            Mbc3 { .. } => self.read_mbc3(address),
+            Mbc5 { .. } => self.read_mbc5(address),
         }
     }
 
     fn write(&mut self, address: Address, value: Word) {
-        use self::MBC::*;
+        use self::Mbc::*;
         match *self {
             HuC1 { .. } => self.write_huc1(address, value),
-            MBC1 { .. } => self.write_mbc1(address, value),
-            MBC2 { .. } => self.write_mbc2(address, value),
-            MBC3 { .. } => self.write_mbc3(address, value),
-            MBC5 { .. } => self.write_mbc5(address, value),
+            Mbc1 { .. } => self.write_mbc1(address, value),
+            Mbc2 { .. } => self.write_mbc2(address, value),
+            Mbc3 { .. } => self.write_mbc3(address, value),
+            Mbc5 { .. } => self.write_mbc5(address, value),
         }
     }
 }
 
-impl Switchable for MBC {
+impl Switchable for Mbc {
     fn switch_bank(&mut self, bank_idx: u8) {
-        use self::MBC::*;
+        use self::Mbc::*;
         match *self {
             HuC1 { .. } => self.switch_bank_huc1(bank_idx),
-            MBC1 { .. } => self.switch_bank_mbc1(bank_idx),
-            MBC2 { .. } => self.switch_bank_mbc2(bank_idx),
-            MBC3 { .. } => self.switch_bank_mbc3(bank_idx),
-            MBC5 { .. } => self.switch_bank_mbc5(bank_idx),
+            Mbc1 { .. } => self.switch_bank_mbc1(bank_idx),
+            Mbc2 { .. } => self.switch_bank_mbc2(bank_idx),
+            Mbc3 { .. } => self.switch_bank_mbc3(bank_idx),
+            Mbc5 { .. } => self.switch_bank_mbc5(bank_idx),
         }
     }
 }
 
-impl Debug for MBC {
+impl Debug for Mbc {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         // TODO: implement debug printing for MBC
         unimplemented!()

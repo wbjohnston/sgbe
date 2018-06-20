@@ -15,7 +15,7 @@ use core::hardware::Cartridge;
 use failure::Error;
 use std::env;
 use std::fs;
-use std::io::{self, Read};
+use std::io::Read;
 
 fn main() -> Result<(), Error> {
     let mut args = env::args();

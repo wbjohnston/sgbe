@@ -36,7 +36,7 @@ pub use self::timer::Timer;
 
 /// Return a double word composed from two [`Word`]s
 pub fn pack_words(lo: Word, hi: Word) -> DoubleWord {
-    (lo as u16) | ((hi as u16) << 8)
+    u16::from(lo) | (u16::from(hi) << 8)
 }
 
 /// Return two [`Word`]s in a tuple of the form `(lo, hi)`

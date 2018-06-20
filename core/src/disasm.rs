@@ -334,7 +334,7 @@ pub fn decode<M: Memory>(memory: &M, address: Address) -> Instruction {
         0x1F => Rra,
 
         0x20 => JrCondS(AddSub, memory.read(next_address) as SignedImmediate8),
-        0x21 => LdRrIi(HL, memory.read(next_address) as Immediate16),
+        0x21 => LdRrIi(HL, memory.read_double(next_address) as Immediate16),
         0x22 => LdiHlA,
         0x23 => IncHl,
         0x24 => IncR(H),

@@ -43,7 +43,7 @@ impl CPU {
     pub fn step<M: Memory>(&mut self, memory: &mut M) -> u8 {
         // read in raw value of instruction into ir
         let instruction = decode(memory, self.registers.pc);
-        self.registers.pc += instruction.size() as Address;
+        self.registers.pc += Address::from(instruction.size());
 
         let cycles_used = self.execute(instruction, memory);
         cycles_used
@@ -144,7 +144,7 @@ impl CPU {
 
     #[inline]
     fn execute_ld_ioc_a<M: Memory>(&mut self, memory: &M) -> bool {
-        self.registers.a = memory.read(0xFF00 + self.registers.c as DoubleWord);
+        self.registers.a = memory.read(0xFF00 + Address::from(self.registers.c));
         false
     }
 
@@ -234,7 +234,7 @@ impl CPU {
     #[inline]
     fn execute_ld_io_a<M: Memory>(&mut self, immediate: Immediate8, memory: &M) -> bool {
         self.registers
-            .write_register8(Register8::A, memory.read(0xFF00 + immediate as Address));
+            .write_register8(Register8::A, memory.read(0xFF00 + Address::from(immediate)));
         false
     }
 

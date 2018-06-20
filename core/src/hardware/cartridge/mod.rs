@@ -9,7 +9,7 @@
 //! Gameboy cartridge types
 
 mod mbc;
-pub use self::mbc::MBC;
+pub use self::mbc::Mbc;
 
 pub mod header;
 use self::header::CartridgeKind;
@@ -24,7 +24,7 @@ use isa::{Address, Word};
 #[derive(Debug, Clone)]
 pub struct Cartridge {
     rom0: Memory32Kb,
-    mbc: Option<MBC>,
+    mbc: Option<Mbc>,
     has_battery: bool,
     timer: Option<Timer>,
 }
@@ -43,15 +43,15 @@ impl Cartridge {
 
         let mbc = match catridge_type {
             RomOnly => None,
-            MBC1 | MBC1Ram | MBC1RamBattery => Some(MBC::try_parse_bytes_mbc1(bytes)?),
-            MBC2 | MBC2Battery => Some(MBC::try_parse_bytes_mbc2(bytes)?),
+            MBC1 | MBC1Ram | MBC1RamBattery => Some(Mbc::try_parse_bytes_mbc1(bytes)?),
+            MBC2 | MBC2Battery => Some(Mbc::try_parse_bytes_mbc2(bytes)?),
             MBC3 | MBC3Ram | MBC3RamBattery | MBC3TimerBattery | MBC3TimerRamBattery => {
-                Some(MBC::try_parse_bytes_mbc3(bytes)?)
+                Some(Mbc::try_parse_bytes_mbc3(bytes)?)
             }
             MBC5 | MBC5Ram | MBC5RamBattery | MBC5Rumble | MBC5RumbleRam | MBC5RumbleRamBattery => {
-                Some(MBC::try_parse_bytes_mbc5(bytes)?)
+                Some(Mbc::try_parse_bytes_mbc5(bytes)?)
             }
-            HuC1RamBattery => Some(MBC::try_parse_bytes_huc1(bytes)?),
+            HuC1RamBattery => Some(Mbc::try_parse_bytes_huc1(bytes)?),
             _ => unimplemented!(),
         };
 
