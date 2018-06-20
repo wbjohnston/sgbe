@@ -14,39 +14,35 @@ pub use self::registers::Registers;
 use disasm::decode;
 use hardware::memory::Memory;
 use isa::{
-    Address, DoubleWord, Flag, Immediate16, Immediate8, Instruction, Register16, Register8,
-    SignedImmediate8, Word,
+    Address, Flag, Immediate16, Immediate8, Instruction, Register16, Register8, SignedImmediate8,
 };
 
 pub const CYCLES_PER_SECOND: usize = 4_194_304;
+pub const BIOS_BUFFER_SIZE: usize = 0x900;
 
 /// A Gameboy central processing unit
 #[derive(Debug, Clone, Copy)]
-pub struct CPU {
+pub struct Cpu {
     ime: bool,
     is_halted: bool,
     registers: Registers,
 }
 
-impl CPU {
-    pub fn new() -> CPU {
-        CPU {
-            // interrupt master enable
-            ime: false,
-            is_halted: false,
-            registers: Registers::default(),
-        }
-    }
-
+impl Cpu {
     /// Execute the current instruction and advance the CPU forward one step, Returns the
     /// number of cycles used
     pub fn step<M: Memory>(&mut self, memory: &mut M) -> u8 {
         // read in raw value of instruction into ir
         let instruction = decode(memory, self.registers.pc);
+        trace!("Fetched instruction {:?}", instruction);
+        trace!(
+            "Advancing program counter from {} to {}",
+            self.registers.pc,
+            self.registers.pc + Address::from(instruction.size())
+        );
         self.registers.pc += Address::from(instruction.size());
 
-        let cycles_used = self.execute(instruction, memory);
-        cycles_used
+        self.execute(instruction, memory)
     }
 
     /// Return a reference to the CPU's registers
@@ -54,8 +50,14 @@ impl CPU {
         &self.registers
     }
 
-    /// Execute an instruction, returning the number of cycles used
+    /// Returns true if the `[CPU]` is halted
+    pub fn is_halted(&self) -> bool {
+        self.is_halted
+    }
+
+    /// Execute an instruction and return the number of cycles used
     fn execute<M: Memory>(&mut self, instruction: Instruction, memory: &mut M) -> u8 {
+        trace!("Entering execution phase");
         use self::Instruction::*;
         let did_branch = match instruction {
             Nop => self.exectue_nop(),
@@ -99,11 +101,13 @@ impl CPU {
 
     #[inline]
     fn exectue_nop(&mut self) -> bool {
+        trace!("Executing nop");
         false
     }
 
     #[inline]
     fn execute_ldd_hl_a<M: Memory>(&mut self, memory: &mut M) -> bool {
+        trace!("Executing ldd (HL) A");
         let a_val = self.registers.read_register8(Register8::A);
         let hl_val = self.registers.read_register16(Register16::HL);
         memory.write(hl_val, a_val);
@@ -115,6 +119,7 @@ impl CPU {
 
     #[inline]
     fn execute_ldd_a_hl<M: Memory>(&mut self, memory: &M) -> bool {
+        trace!("Executing ldd A (HL)");
         let hl_val = self.registers.read_register16(Register16::HL);
         self.registers
             .write_register8(Register8::A, memory.read(hl_val));
@@ -124,6 +129,7 @@ impl CPU {
 
     #[inline]
     fn execute_ld_hl_r<M: Memory>(&mut self, register: Register8, memory: &M) -> bool {
+        trace!("Executing ld (HL) {}", register);
         let hl_val = self.registers.read_register16(Register16::HL);
         self.registers
             .write_register8(Register8::A, memory.read(hl_val));
@@ -132,36 +138,42 @@ impl CPU {
 
     #[inline]
     fn execute_di<M: Memory>(&mut self, memory: &mut M) -> bool {
+        trace!("Executing di");
         memory.write(0xFFFF, 0x00); // TODO: Is this the right value?
         false
     }
 
     #[inline]
     fn execute_ei<M: Memory>(&mut self, memory: &mut M) -> bool {
+        trace!("Executing ei");
         memory.write(0xFFFF, 0xFF); // TODO: is this the right value?
         false
     }
 
     #[inline]
     fn execute_ld_ioc_a<M: Memory>(&mut self, memory: &M) -> bool {
+        trace!("TODO: annotate this correctyl");
         self.registers.a = memory.read(0xFF00 + Address::from(self.registers.c));
         false
     }
 
     #[inline]
     fn execute_ld_a_i(&mut self, immediate: Immediate8) -> bool {
+        trace!("Executing ld a {}", immediate);
         self.registers.a = immediate;
         false
     }
 
     #[inline]
     fn execute_ld_r_i(&mut self, register: Register8, immediate: Immediate8) -> bool {
+        trace!("Executing ld {} {}", register, immediate);
         self.registers.write_register8(register, immediate);
         false
     }
 
     #[inline]
     fn exectue_jr_cond_s(&mut self, condition: Flag, offset: SignedImmediate8) -> bool {
+        trace!("Executing jr {} {}", condition, offset);
         if self.registers.read_flag(condition) {
             debug!("Instruction not implemented");
             true
@@ -173,7 +185,8 @@ impl CPU {
 
     #[inline]
     fn execute_bit_i_r(&mut self, immediate: Immediate8, register: Register8) -> bool {
-        debug!("Instruction not implemented");
+        trace!("Executing bit {} {}", immediate, register);
+        debug!("instruction not implemented");
 
         // TODO:  implement me
         false
@@ -181,12 +194,14 @@ impl CPU {
 
     #[inline]
     fn execute_ld_rr_ii(&mut self, register: Register16, immediate: Immediate16) -> bool {
+        info!("Executing ld {} {}", register, immediate);
         self.registers.write_register16(register, immediate);
         false
     }
 
     #[inline]
     fn execute_and_a_r(&mut self, register: Register8) -> bool {
+        info!("Executing and a {}", register);
         // TODO: need to set flags
         let a_value = self.registers.read_register8(Register8::A);
         let reg_value = self.registers.read_register8(register);
@@ -199,6 +214,7 @@ impl CPU {
 
     #[inline]
     fn execute_add_a_r(&mut self, register: Register8) -> bool {
+        info!("Executing add a {}", register);
         // TODO: need to set flags
         let a_value = self.registers.read_register8(Register8::A);
         let reg_value = self.registers.read_register8(register);
@@ -211,6 +227,7 @@ impl CPU {
 
     #[inline]
     fn execute_xor_a_r(&mut self, register: Register8) -> bool {
+        info!("Executing xor A {}", register);
         // TODO: need to set flags
         use self::Register8::A;
         let a_value = self.registers.read_register8(A);
@@ -223,6 +240,7 @@ impl CPU {
 
     #[inline]
     fn execute_xor_a_i(&mut self, immediate: Immediate8) -> bool {
+        trace!("Executing xor A {}", immediate);
         // TODO: need to set flags
         use self::Register8::A;
         let a_value = self.registers.read_register8(A);
@@ -233,6 +251,7 @@ impl CPU {
 
     #[inline]
     fn execute_ld_io_a<M: Memory>(&mut self, immediate: Immediate8, memory: &M) -> bool {
+        trace!("Executing ldh {} A", immediate);
         self.registers
             .write_register8(Register8::A, memory.read(0xFF00 + Address::from(immediate)));
         false
@@ -240,6 +259,7 @@ impl CPU {
 
     #[inline]
     fn execute_ld_a_io<M: Memory>(&mut self, immediate: Immediate8, memory: &mut M) -> bool {
+        trace!("TODO: notate this correctly");
         memory.write(
             0xFF00 + immediate as Address,
             self.registers.read_register8(Register8::A),
@@ -249,6 +269,7 @@ impl CPU {
 
     #[inline]
     fn execute_ld_r_r(&mut self, register_a: Register8, register_b: Register8) -> bool {
+        trace!("Executing ld {} {}", register_a, register_b);
         let src = self.registers.read_register8(register_a);
         self.registers.write_register8(register_b, src);
         false
@@ -256,6 +277,7 @@ impl CPU {
 
     #[inline]
     fn execute_ld_a_rr<M: Memory>(&mut self, register: Register16, memory: &mut M) -> bool {
+        trace!("Executing ld A ({})", register);
         let val = self.registers.read_register8(Register8::A);
         let address = self.registers.read_register16(register);
         memory.write(address, val);
@@ -264,6 +286,7 @@ impl CPU {
 
     #[inline]
     fn execute_call_ii<M: Memory>(&mut self, address: Address, memory: &mut M) -> bool {
+        trace!("Executing call {}", address);
         self.registers.sp -= 2;
         let sp = self.registers.sp;
         memory.write_double(sp, self.registers.pc);
@@ -273,6 +296,7 @@ impl CPU {
 
     #[inline]
     fn execute_inc_rr(&mut self, register: Register16) -> bool {
+        trace!("Executing inc {}", register);
         let val = self.registers.read_register16(register);
         self.registers.write_register16(register, val + 1);
         false
@@ -280,6 +304,7 @@ impl CPU {
 
     #[inline]
     fn execute_cp_a_i(&mut self, immediate: Immediate8) -> bool {
+        trace!("Executing cp A {}", immediate);
         let a = self.registers.read_register8(Register8::A);
         self.registers.write_flag(Flag::Zero, a == immediate);
         self.registers.write_flag(Flag::AddSub, true);
@@ -290,6 +315,7 @@ impl CPU {
 
     #[inline]
     fn execute_push_rr<M: Memory>(&mut self, register: Register16, memory: &mut M) -> bool {
+        trace!("Executing push {}", register);
         self.registers.pc -= 2;
         let val = self.registers.read_register16(register);
         memory.write_double(self.registers.pc, val);
@@ -298,6 +324,7 @@ impl CPU {
 
     #[inline]
     fn execute_inc_r(&mut self, register: Register8) -> bool {
+        trace!("Executing inc {}", register);
         let val = self.registers.read_register8(register);
         self.registers.write_register8(register, val + 1);
         false
@@ -305,6 +332,7 @@ impl CPU {
 
     #[inline]
     fn execute_dec_rr(&mut self, register: Register16) -> bool {
+        trace!("Executing dec {}", register);
         let val = self.registers.read_register16(register);
         self.registers.write_register16(register, val - 1);
         false
@@ -312,8 +340,20 @@ impl CPU {
 
     #[inline]
     fn execute_dec_r(&mut self, register: Register8) -> bool {
+        trace!("Executing dec {}", register);
         let val = self.registers.read_register8(register);
         self.registers.write_register8(register, val - 1);
         false
+    }
+}
+
+impl Default for Cpu {
+    fn default() -> Self {
+        Cpu {
+            // interrupt master enable
+            ime: false,
+            is_halted: false,
+            registers: Registers::default(),
+        }
     }
 }

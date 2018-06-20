@@ -6,7 +6,7 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-//! Gameboy systems
+//! Full emulator systems
 
 use enumset::EnumSet;
 use hardware::bios::{Bios, CgbBios, GbBios};
@@ -15,14 +15,14 @@ use hardware::cartridge::Cartridge;
 use hardware::cpu::Registers;
 use hardware::memory::Memory8Kb;
 use hardware::mmu::swram::{self, Swram};
-use hardware::{APU, CPU, MMU, PPU};
+use hardware::{Apu, Cpu, Mmu, Ppu};
 use isa::Address;
 
 /// Gameboy
-pub type Gb = System<swram::Fixed, GbBios>;
+pub type Gb = System<swram::Fixed>;
 
 /// Gameboy color
-pub type Cgb = System<swram::Banked, CgbBios>;
+pub type Cgb = System<swram::Banked>;
 
 /// Gameboy Keys state
 pub type Buttons = EnumSet<Button>;
@@ -42,29 +42,28 @@ enum_set_type! {
 }
 
 /// A Gameboy sytem
-pub struct System<S: Swram, B: Bios> {
+pub struct System<S: Swram> {
     input: Buttons,
-    cpu: CPU,
-    mmu: MMU<S, B>,
-    gpu: PPU,
-    apu: APU,
+    cpu: Cpu,
+    mmu: Mmu<S>,
+    gpu: Ppu,
+    apu: Apu,
 }
 
-impl<S: Swram + Default, B: Bios> System<S, B> {
+impl<S: Swram + Default> System<S> {
     /// Create a new system with no loaded catridge
-    pub fn new(bios: B) -> Self {
-        let mmu = MMU::<S, B>::new(bios);
+    pub fn new<B: Bios>(bios: B) -> Self {
         System {
             input: Buttons::empty(),
-            cpu: CPU::new(),
-            mmu,
-            gpu: PPU::new(),
-            apu: APU::new(),
+            cpu: Cpu::default(),
+            mmu: Mmu::default(),
+            gpu: Ppu::default(),
+            apu: Apu::default(),
         }
     }
 }
 
-impl<S: Swram, B: Bios> System<S, B> {
+impl<S: Swram> System<S> {
     /// Load a catridge into the system
     pub fn load(&mut self, cartridge: Cartridge) {
         self.mmu.load(cartridge)
@@ -119,7 +118,7 @@ impl<S: Swram, B: Bios> System<S, B> {
         self.cpu.registers().pc
     }
 
-    pub fn mmu(&self) -> &MMU<S, B> {
+    pub fn mmu(&self) -> &Mmu<S> {
         &self.mmu
     }
 }

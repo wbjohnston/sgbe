@@ -9,22 +9,23 @@
 //! Picture processing unit type
 
 use super::mmu::Swram;
-use super::MMU;
+use super::Mmu;
 use hardware::bios::Bios;
 
 /// A Gameboy picture processing unit
 #[derive(Debug, Clone, Copy)]
-pub struct PPU;
+pub struct Ppu;
 
-impl PPU {
-    /// Create a new `PPU`
-    pub fn new() -> PPU {
-        PPU {}
-    }
-
+impl Ppu {
     /// Emulate the function of a `PPU` over a given number of cycles
-    pub fn emulate<S: Swram, B: Bios>(&mut self, cycles: usize, mmu: &mut MMU<S, B>) {
+    pub fn emulate<S: Swram>(&mut self, cycles: usize, mmu: &mut Mmu<S>) {
         debug!("PPU not yet implemented")
         // TODO: implement PPU::emulate
+    }
+}
+
+impl Default for Ppu {
+    fn default() -> Self {
+        Ppu {}
     }
 }

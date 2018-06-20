@@ -6,7 +6,7 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-//! Gameboy hardware components
+//! Hardware components
 
 use isa::{DoubleWord, Word};
 
@@ -18,16 +18,16 @@ pub mod cartridge;
 pub use self::cartridge::Cartridge;
 
 pub mod cpu;
-pub use self::cpu::CPU;
+pub use self::cpu::Cpu;
 
 pub mod ppu;
-pub use self::ppu::PPU;
+pub use self::ppu::Ppu;
 
 pub mod mmu;
-pub use self::mmu::MMU;
+pub use self::mmu::Mmu;
 
 pub mod apu;
-pub use self::apu::APU;
+pub use self::apu::Apu;
 
 pub mod timer;
 pub use self::timer::Timer;

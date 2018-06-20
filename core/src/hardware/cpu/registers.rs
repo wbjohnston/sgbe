@@ -50,7 +50,7 @@ impl Registers {
     /// Return the value in an 8-bit register
     pub fn read_register8(&self, register: Register8) -> Word {
         use self::Register8::*;
-        match register {
+        let val = match register {
             A => self.a,
             F => self.f,
             B => self.b,
@@ -59,11 +59,15 @@ impl Registers {
             E => self.e,
             H => self.h,
             L => self.l,
-        }
+        };
+
+        trace!("Read value of {:?} from register {:?}", val, register);
+        val
     }
 
     /// Set the value in an 8-bit register
     pub fn write_register8(&mut self, register: Register8, value: Word) {
+        trace!("Writing value {:?} to register {:?}", value, register);
         use self::Register8::*;
         match register {
             A => self.a = value,
@@ -81,18 +85,22 @@ impl Registers {
     pub fn read_register16(&self, register: Register16) -> DoubleWord {
         use self::Register16::*;
         use self::Register8::*;
-        match register {
+        let val = match register {
             AF => pack_words(self.read_register8(F), self.read_register8(A)),
             BC => pack_words(self.read_register8(C), self.read_register8(B)),
             DE => pack_words(self.read_register8(E), self.read_register8(D)),
             HL => pack_words(self.read_register8(L), self.read_register8(H)),
             SP => self.sp,
             PC => self.pc,
-        }
+        };
+
+        trace!("Read value of {:?} from register {:?}", val, register);
+        val
     }
 
     /// Set the value in an 16-bit register
     pub fn write_register16(&mut self, register: Register16, value: DoubleWord) {
+        trace!("Writing value {:?} to register {:?}", value, register);
         use self::Register16::*;
         use self::Register8::*;
         let (lo, hi) = split_doubleword(value);
@@ -121,17 +129,21 @@ impl Registers {
     /// Return the value of a flag
     pub fn read_flag(&self, flag: Flag) -> bool {
         use self::Flag::*;
-        match flag {
+        let val = match flag {
             Zero => self.f & (1 << ZF_FLAG_BIT_N) != 0,
             AddSub => self.f & (1 << NF_FLAG_BIT_N) != 0,
             HalfCarry => self.f & (1 << HF_FLAG_BIT_N) != 0,
             Carry => self.f & (1 << CF_FLAG_BIT_N) != 0,
-        }
+        };
+
+        trace!("Read value of {:?} for flag {:?}", val, flag);
+        val
     }
 
     /// Write the value of a flag
     pub fn write_flag(&mut self, flag: Flag, value: bool) {
         use self::Flag::*;
+        trace!("Writing value {:?} to flag {:?}", value, flag);
 
         fn set_bit(byte: &mut u8, n: u8) {
             *byte |= 1 << n;

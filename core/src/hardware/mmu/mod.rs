@@ -11,7 +11,6 @@ pub use self::swram::Swram;
 
 use system::Buttons;
 
-use hardware::bios::Bios;
 use hardware::memory::addresses::memory_map::*;
 use hardware::memory::Memory;
 use hardware::memory::{Memory4Kb, Memory8Kb};
@@ -19,8 +18,7 @@ use hardware::Cartridge;
 use isa::{Address, Word};
 
 /// A Gameboy Memory management unit
-pub struct MMU<S: Swram, B: Bios> {
-    bios: B,
+pub struct Mmu<S: Swram> {
     cartridge: Option<Cartridge>,
     vram: Memory8Kb,         // video ram
     wram: Memory4Kb,         // work ram
@@ -30,27 +28,7 @@ pub struct MMU<S: Swram, B: Bios> {
     hram: [Word; HRAM_SIZE], // high ram
 }
 
-impl<S: Swram + Default, B: Bios> MMU<S, B> {
-    /// Crete a new MMMU with initialized io ram
-    pub fn new(bios: B) -> Self {
-        let oam = [0; OAM_SIZE];
-        let iom = Self::new_io_memory();
-        let hram = [0; HRAM_SIZE];
-
-        Self {
-            bios,
-            cartridge: None,
-            vram: Memory8Kb::new(),
-            wram: Memory4Kb::new(),
-            swram: S::default(),
-            oam,
-            iom,
-            hram,
-        }
-    }
-}
-
-impl<S: Swram, B: Bios> MMU<S, B> {
+impl<S: Swram> Mmu<S> {
     pub fn vram(&self) -> &Memory8Kb {
         &self.vram
     }
@@ -72,7 +50,7 @@ impl<S: Swram, B: Bios> MMU<S, B> {
     /// Create a new IO memory section for the gameboy
     fn new_io_memory() -> [Word; IOM_SIZE] {
         let mut iom = [0; IOM_SIZE];
-        let io_addr = |address| (address - IOM_OFFSET) as usize;
+        let io_addr = |address| usize::from(address - IOM_OFFSET);
 
         // initialize correct values for io memory
         iom[io_addr(0xFF05)] = 0x00; // TIMA
@@ -110,11 +88,10 @@ impl<S: Swram, B: Bios> MMU<S, B> {
     }
 }
 
-impl<S: Swram, B: Bios> Memory for MMU<S, B> {
+impl<S: Swram> Memory for Mmu<S> {
     /// Read a word from memory
     fn read(&self, address: Address) -> Word {
         match address {
-            BIOS_OFFSET...BIOS_END => self.bios.read(address - BIOS_OFFSET),
             ROM0_OFFSET...ROM0_END => if let Some(ref cartridge) = self.cartridge {
                 cartridge.read(address - ROM0_OFFSET)
             } else {
@@ -145,14 +122,13 @@ impl<S: Swram, B: Bios> Memory for MMU<S, B> {
             }
             IOM_OFFSET...IOM_END => self.iom[(address - IOM_OFFSET) as usize],
             HRAM_OFFSET...HRAM_END => self.hram[(address - HRAM_OFFSET) as usize],
-            _ => unreachable!()
+            _ => unreachable!(),
         }
     }
 
     /// Write a `Word` to memory
     fn write(&mut self, address: Address, value: Word) {
         match address {
-            BIOS_OFFSET...BIOS_END => self.bios.write(address, value),
             ROM0_OFFSET...ROM0_END => if let Some(ref mut cartridge) = self.cartridge {
                 cartridge.write(address - ROM0_OFFSET, value)
             },
@@ -171,7 +147,7 @@ impl<S: Swram, B: Bios> Memory for MMU<S, B> {
             OAM_OFFSET...OAM_END => self.oam[(address - OAM_OFFSET) as usize] = value,
             address @ UNUSABLE_MEMORY_OFFSET...UNUSABLE_MEMORY_END => {
                 warn!("Tried to write to unusable memory at address {}", address)
-            },
+            }
             IOM_OFFSET...IOM_END => self.iom[(address - IOM_OFFSET) as usize] = value,
             HRAM_OFFSET...HRAM_END => self.hram[(address - HRAM_OFFSET) as usize] = value,
             _ => unreachable!(),
@@ -179,7 +155,23 @@ impl<S: Swram, B: Bios> Memory for MMU<S, B> {
     }
 }
 
-#[cfg(test)]
-mod test {
+impl<S: Swram + Default> Default for Mmu<S> {
+    fn default() -> Self {
+        let oam = [0; OAM_SIZE];
+        let iom = Self::new_io_memory();
+        let hram = [0; HRAM_SIZE];
 
+        Self {
+            cartridge: None,
+            vram: Memory8Kb::default(),
+            wram: Memory4Kb::default(),
+            swram: S::default(),
+            oam,
+            iom,
+            hram,
+        }
+    }
 }
+
+#[cfg(test)]
+mod test {}

@@ -6,6 +6,8 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+//! Types for representing the gameboy instruction set architecture
+
 use std::fmt;
 
 /// A 8-bit, signed, immediate value
@@ -460,13 +462,9 @@ impl Instruction {
         use self::Instruction::*;
         match self {
             JpCondIi(_, _) => 16,
-
             JrCondS(_, _) => 12,
-
             CallCondIi(_, _) => 24,
-
             RetCond(_) => 20,
-
             v => v.cycles(),
         }
     }

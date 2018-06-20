@@ -6,6 +6,9 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
+#[cfg(feature="logging")]
+extern crate env_logger;
+
 extern crate core;
 use core::disasm::decode;
 use core::hardware::bios::{Bios, GbBios};
@@ -71,6 +74,9 @@ fn print_instruction<M: Memory>(memory: &M, address: Address) {
 }
 
 fn main() -> Result<(), Error> {
+    #[cfg(feature="logging")]
+    let _ = env_logger::init();
+
     let bios = GbBios::from(*include_bytes!("../roms/gb_bios.bin"));
     let rom = include_bytes!("../roms/tetris.gb");
     let cartridge = Cartridge::try_parse_bytes(rom)?;

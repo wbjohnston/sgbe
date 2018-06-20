@@ -6,24 +6,24 @@
 // option. This file may not be copied, modified, or distributed
 // except according to those terms.
 
-use hardware::bios::Bios;
 use hardware::mmu::Swram;
-use hardware::MMU;
+use hardware::Mmu;
 
 /// A gameboy APU
 #[derive(Debug, Copy, Clone)]
-pub struct APU {
+pub struct Apu {
     // TODO: implement the fields of the APU
 }
 
-impl APU {
-    /// Create a new `APU`
-    pub fn new() -> Self {
-        APU {}
-    }
-
+impl Apu {
     /// Emulate the function of an `APU` over a specified number of cycles
-    pub fn emulate<S: Swram, B: Bios>(&mut self, cycles: usize, mmu: &mut MMU<S, B>) {
+    pub fn emulate<S: Swram>(&mut self, cycles: usize, mmu: &mut Mmu<S>) {
         debug!("APU emulation not yet implemented")
+    }
+}
+
+impl Default for Apu {
+    fn default() -> Self {
+        Apu {}
     }
 }
