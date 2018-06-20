@@ -38,9 +38,9 @@ impl<S: Swram> Mmu<S> {
         self.cartridge = Some(cartridge);
     }
 
-    /// Unload the current catridge from the MMU
-    pub fn unload(&mut self) {
-        self.cartridge = None;
+    /// Unload the current catridge from the MMU and return it
+    pub fn maybe_unload(&mut self) -> Option<Cartridge> {
+        self.cartridge.take()
     }
 
     pub fn update_input_registers(&mut self, input: Buttons) {

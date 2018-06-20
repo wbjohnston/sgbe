@@ -27,7 +27,7 @@ pub type Cgb = System<swram::Banked>;
 /// Gameboy Keys state
 pub type Buttons = EnumSet<Button>;
 
-/// State of the Dpad
+/// A gameboy button
 enum_set_type! {
     pub enum Button {
         A,
@@ -70,8 +70,8 @@ impl<S: Swram> System<S> {
     }
 
     /// Unload the current cartridge from the sytem
-    pub fn unload(&mut self) {
-        self.mmu.unload()
+    pub fn maybe_unload(&mut self) -> Option<Cartridge> {
+        self.mmu.maybe_unload()
     }
 
     /// Step the sytem forward on instruction execution
