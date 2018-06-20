@@ -16,40 +16,44 @@ use self::header::CartridgeKind;
 
 use failure::Error;
 use hardware::memory::Memory;
+use hardware::memory::Memory32Kb;
 use hardware::Timer;
 use isa::{Address, Word};
-
-const CATRIDGE_TYPE_ADDR: usize = 0x147;
 
 /// A gameboy cartridge
 #[derive(Debug, Clone)]
 pub struct Cartridge {
-    mbc: MBC,
+    rom0: Memory32Kb,
+    mbc: Option<MBC>,
     has_battery: bool,
     timer: Option<Timer>,
 }
 
 impl Cartridge {
+    /// Try to parse a byte stream into a catridge, returning an error if any occurred
     pub fn try_parse_bytes(bytes: &[u8]) -> Result<Self, Error> {
         use self::CartridgeKind::*;
         // don't try to parse if a header can't even be read
         Self::validate_header(bytes)?;
 
-        let catridge_type = bytes[CATRIDGE_TYPE_ADDR].into();
+        let rom0 = Self::try_parse_rom0(bytes)?;
+
+        // get the cartridge type flag
+        let catridge_type = rom0.read(header::CATRIDGE_TYPE_ADDRESS).into();
 
         let mbc = match catridge_type {
-            RomOnly => MBC::try_parse_bytes_fixed(bytes),
-            MBC1 | MBC1Ram | MBC1RamBattery => MBC::try_parse_bytes_mbc1(bytes),
-            MBC2 | MBC2Battery => MBC::try_parse_bytes_mbc2(bytes),
+            RomOnly => None,
+            MBC1 | MBC1Ram | MBC1RamBattery => Some(MBC::try_parse_bytes_mbc1(bytes)?),
+            MBC2 | MBC2Battery => Some(MBC::try_parse_bytes_mbc2(bytes)?),
             MBC3 | MBC3Ram | MBC3RamBattery | MBC3TimerBattery | MBC3TimerRamBattery => {
-                MBC::try_parse_bytes_mbc3(bytes)
+                Some(MBC::try_parse_bytes_mbc3(bytes)?)
             }
             MBC5 | MBC5Ram | MBC5RamBattery | MBC5Rumble | MBC5RumbleRam | MBC5RumbleRamBattery => {
-                MBC::try_parse_bytes_mbc5(bytes)
+                Some(MBC::try_parse_bytes_mbc5(bytes)?)
             }
-            HuC1RamBattery => MBC::try_parse_bytes_huc1(bytes),
+            HuC1RamBattery => Some(MBC::try_parse_bytes_huc1(bytes)?),
             _ => unimplemented!(),
-        }?;
+        };
 
         let has_battery = catridge_type.has_battery();
 
@@ -61,13 +65,14 @@ impl Cartridge {
         };
 
         Ok(Cartridge {
+            rom0,
             mbc,
             has_battery,
             timer,
         })
     }
 
-    /// Returns true if the given byte array may contain a valid header
+    /// Returns an `[failure::Error]` if there is a problem parsing the header
     fn validate_header(bytes: &[u8]) -> Result<(), Error> {
         // basic check. make sure there are enough bytes to form a header
         if bytes.len() < 0x14 {
@@ -78,15 +83,28 @@ impl Cartridge {
 
         Ok(())
     }
+
+    fn try_parse_rom0(bytes: &[u8]) -> Result<Memory32Kb, Error> {
+        // FIXME: bad alloc, maybe use cow?
+        let mut inner = [0; 1024 * 32]; // 32kb
+        inner.copy_from_slice(&bytes[0..1024 * 32]);
+        Ok(Memory32Kb::from(inner))
+    }
 }
 
 impl Memory for Cartridge {
     fn read(&self, address: Address) -> Word {
-        self.mbc.read(address)
+        if let Some(ref mbc) = self.mbc {
+            mbc.read(address)
+        } else {
+            Word::default()
+        }
     }
 
     fn write(&mut self, address: Address, value: Word) {
-        self.mbc.write(address, value)
+        if let Some(ref mut mbc) = self.mbc {
+            mbc.write(address, value)
+        }
     }
 }
 

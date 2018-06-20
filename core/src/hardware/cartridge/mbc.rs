@@ -17,60 +17,24 @@ use isa::{Address, Word};
 /// Memory bank controller
 #[derive(Clone)]
 pub enum MBC {
-    // TODO: probably move rom0 to the cartridge iteself since it's not _actually_
-    // managed by the MBC
-    Fixed {
-        rom0: Memory32Kb,
-    },
     HuC1 {
-        rom0: Memory32Kb, // TODO: add HuC1 fields
+        // TODO: add HuC1 fields
     },
     MBC1 {
-        rom0: Memory32Kb, // TODO: add MBC1 fields
+        // TODO: add MBC1 fields
     },
     MBC2 {
-        rom0: Memory32Kb, // TODO: add MBC2 fields
+        // TODO: add MBC2 fields
     },
     MBC3 {
-        rom0: Memory32Kb, // TODO: add MBC3 fields
+        // TODO: add MBC3 fields
     },
     MBC5 {
-        rom0: Memory32Kb, // TODO: add MBC5 fields
+        // TODO: add MBC5 fields
     },
 }
 
 impl MBC {
-    pub fn try_parse_bytes_fixed(bytes: &[u8]) -> Result<Self, Error> {
-        fn validate(bytes: &[u8]) -> Result<(), Error> {
-            // TODO: implement fixed validation
-            Ok(())
-        }
-
-        validate(bytes)?;
-
-        Ok(MBC::Fixed {
-            rom0: Self::try_parse_rom0(bytes)?,
-        })
-    }
-
-    fn read_fixed(&self, address: Address) -> Word {
-        match *self {
-            MBC::Fixed { ref rom0 } => rom0.read(address),
-            _ => unreachable!(),
-        }
-    }
-
-    fn write_fixed(&mut self, address: Address, value: Word) {
-        match *self {
-            MBC::Fixed { ref mut rom0 } => rom0.write(address, value),
-            _ => unreachable!(),
-        }
-    }
-
-    fn switch_bank_fixed(&mut self, _bank_idx: u8) {
-        /* nop */
-    }
-
     pub fn try_parse_bytes_huc1(bytes: &[u8]) -> Result<Self, Error> {
         fn validate(bytes: &[u8]) -> Result<(), Error> {
             // TODO: implement fixed validation
@@ -79,6 +43,7 @@ impl MBC {
 
         validate(bytes)?;
 
+        // TODO: implement parsing for huc1 cartridges
         unimplemented!()
     }
 
@@ -200,20 +165,12 @@ impl MBC {
         // TODO:  implement me
         unimplemented!()
     }
-
-    fn try_parse_rom0(bytes: &[u8]) -> Result<Memory32Kb, Error> {
-        // FIXME: bad alloc, maybe use cow?
-        let mut inner = [0; 1024 * 32];
-        inner.copy_from_slice(&bytes[0..1024 * 32]);
-        Ok(Memory32Kb::from(inner))
-    }
 }
 
 impl Memory for MBC {
     fn read(&self, address: Address) -> Word {
         use self::MBC::*;
         match *self {
-            Fixed { .. } => self.read_fixed(address),
             HuC1 { .. } => self.read_huc1(address),
             MBC1 { .. } => self.read_mbc1(address),
             MBC2 { .. } => self.read_mbc2(address),
@@ -225,7 +182,6 @@ impl Memory for MBC {
     fn write(&mut self, address: Address, value: Word) {
         use self::MBC::*;
         match *self {
-            Fixed { .. } => self.write_fixed(address, value),
             HuC1 { .. } => self.write_huc1(address, value),
             MBC1 { .. } => self.write_mbc1(address, value),
             MBC2 { .. } => self.write_mbc2(address, value),
@@ -239,7 +195,6 @@ impl Switchable for MBC {
     fn switch_bank(&mut self, bank_idx: u8) {
         use self::MBC::*;
         match *self {
-            Fixed { .. } => self.switch_bank_fixed(bank_idx),
             HuC1 { .. } => self.switch_bank_huc1(bank_idx),
             MBC1 { .. } => self.switch_bank_mbc1(bank_idx),
             MBC2 { .. } => self.switch_bank_mbc2(bank_idx),
@@ -251,6 +206,7 @@ impl Switchable for MBC {
 
 impl Debug for MBC {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        // TODO: implement debug printing for MBC
         unimplemented!()
     }
 }

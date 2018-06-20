@@ -10,6 +10,7 @@
 
 pub mod addresses;
 
+use std::fmt;
 use hardware::{pack_words, split_doubleword};
 use isa::{Address, DoubleWord, Word};
 
@@ -80,6 +81,12 @@ impl Default for Memory4Kb {
     }
 }
 
+impl fmt::Debug for Memory4Kb {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        unimplemented!()
+    }
+}
+
 /// A 8KB memory bank
 #[derive(Clone)]
 pub struct Memory8Kb(Memory8KbInner);
@@ -106,6 +113,12 @@ impl Default for Memory8Kb {
     }
 }
 
+impl fmt::Debug for Memory8Kb {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        unimplemented!()
+    }
+}
+
 /// A 16KB memory bank
 #[derive(Clone)]
 pub struct Memory16Kb(Memory16KbInner);
@@ -129,6 +142,12 @@ impl Memory for Memory16Kb {
 impl Default for Memory16Kb {
     fn default() -> Self {
         Memory16Kb(Box::new([0; 16 * KB]))
+    }
+}
+
+impl fmt::Debug for Memory16Kb {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        unimplemented!()
     }
 }
 
@@ -160,5 +179,11 @@ impl From<[u8; KB * 32]> for Memory32Kb {
 impl Default for Memory32Kb {
     fn default() -> Self {
         Memory32Kb(Box::new([0; 32 * KB]))
+    }
+}
+
+impl fmt::Debug for Memory32Kb {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        unimplemented!()
     }
 }

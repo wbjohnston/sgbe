@@ -87,20 +87,20 @@ impl fmt::Display for Register16 {
 /// A CPU flag
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum Flag {
-    Zf,
-    Nf,
-    Hf,
-    Cf,
+    Zero,
+    AddSub,
+    HalfCarry,
+    Carry,
 }
 
 impl fmt::Display for Flag {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         use self::Flag::*;
         let st = match *self {
-            Zf => "Z",
-            Nf => "N",
-            Hf => "H",
-            Cf => "C",
+            Zero => "Z",
+            AddSub => "N",
+            HalfCarry => "H",
+            Carry => "C",
         };
 
         write!(f, "{}", st)
@@ -118,7 +118,7 @@ impl fmt::Display for Flag {
 /// * `S`: 8-bit, signed, immediate value
 /// * `A`: the 8-bit `A` accumulator register
 /// * `Hl`: the `HL 16-bit register
-/// * `SP`: The 16-bit `SP`, stack pointer, register
+/// * `SP`: The 16-bit `SP` stack pointer register
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub enum Instruction {
     // 8-bit load instructions

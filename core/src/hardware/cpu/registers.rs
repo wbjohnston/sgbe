@@ -122,10 +122,10 @@ impl Registers {
     pub fn read_flag(&self, flag: Flag) -> bool {
         use self::Flag::*;
         match flag {
-            Zf => self.f & (1 << ZF_FLAG_BIT_N) != 0,
-            Nf => self.f & (1 << NF_FLAG_BIT_N) != 0,
-            Hf => self.f & (1 << HF_FLAG_BIT_N) != 0,
-            Cf => self.f & (1 << CF_FLAG_BIT_N) != 0,
+            Zero => self.f & (1 << ZF_FLAG_BIT_N) != 0,
+            AddSub => self.f & (1 << NF_FLAG_BIT_N) != 0,
+            HalfCarry => self.f & (1 << HF_FLAG_BIT_N) != 0,
+            Carry => self.f & (1 << CF_FLAG_BIT_N) != 0,
         }
     }
 
@@ -143,17 +143,17 @@ impl Registers {
 
         if value {
             match flag {
-                Zf => set_bit(&mut self.f, ZF_FLAG_BIT_N),
-                Nf => set_bit(&mut self.f, NF_FLAG_BIT_N),
-                Hf => set_bit(&mut self.f, HF_FLAG_BIT_N),
-                Cf => set_bit(&mut self.f, CF_FLAG_BIT_N),
+                Zero => set_bit(&mut self.f, ZF_FLAG_BIT_N),
+                AddSub => set_bit(&mut self.f, NF_FLAG_BIT_N),
+                HalfCarry => set_bit(&mut self.f, HF_FLAG_BIT_N),
+                Carry => set_bit(&mut self.f, CF_FLAG_BIT_N),
             }
         } else {
             match flag {
-                Zf => unset_bit(&mut self.f, ZF_FLAG_BIT_N),
-                Nf => unset_bit(&mut self.f, NF_FLAG_BIT_N),
-                Hf => unset_bit(&mut self.f, HF_FLAG_BIT_N),
-                Cf => unset_bit(&mut self.f, CF_FLAG_BIT_N),
+                Zero => unset_bit(&mut self.f, ZF_FLAG_BIT_N),
+                AddSub => unset_bit(&mut self.f, NF_FLAG_BIT_N),
+                HalfCarry => unset_bit(&mut self.f, HF_FLAG_BIT_N),
+                Carry => unset_bit(&mut self.f, CF_FLAG_BIT_N),
             }
         }
     }

@@ -281,10 +281,10 @@ impl CPU {
     #[inline]
     fn execute_cp_a_i(&mut self, immediate: Immediate8) -> bool {
         let a = self.registers.read_register8(Register8::A);
-        self.registers.write_flag(Flag::Zf, a == immediate);
-        self.registers.write_flag(Flag::Nf, true);
-        self.registers.write_flag(Flag::Hf, true); // TODO: this is wrong
-        self.registers.write_flag(Flag::Cf, a < immediate);
+        self.registers.write_flag(Flag::Zero, a == immediate);
+        self.registers.write_flag(Flag::AddSub, true);
+        self.registers.write_flag(Flag::HalfCarry, true); // TODO: this is wrong
+        self.registers.write_flag(Flag::Carry, a < immediate);
         false
     }
 
