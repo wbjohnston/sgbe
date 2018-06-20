@@ -8,8 +8,23 @@
 
 use std::fmt;
 
-mod types;
-pub use self::types::{Address, DoubleWord, Immediate, Immediate16, SignedImmediate, Word};
+/// A 8-bit, signed, immediate value
+pub type SignedImmediate = i8;
+
+/// A word
+pub type Word = u8;
+
+/// A double sized word
+pub type DoubleWord = u16;
+
+/// An address
+pub type Address = DoubleWord;
+
+/// An 8-bit, unsigned, immediate value
+pub type Immediate = Word;
+
+/// A 16-bit, unsigned, immediate value
+pub type Immediate16 = DoubleWord;
 
 // An 8-bit register
 #[derive(Debug, Copy, Clone)]
@@ -26,8 +41,19 @@ pub enum Register8 {
 
 impl fmt::Display for Register8 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        // TODO:  implement me
-        unimplemented!()
+        use self::Register8::*;
+        let st = match *self {
+            A => "A",
+            F => "F",
+            B => "B",
+            C => "C",
+            D => "D",
+            E => "E",
+            H => "H",
+            L => "L",
+        };
+
+        write!(f, "{}", st)
     }
 }
 
@@ -44,8 +70,17 @@ pub enum Register16 {
 
 impl fmt::Display for Register16 {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        // TODO:  implement me
-        unimplemented!()
+        use self::Register16::*;
+        let st = match *self {
+            AF => "AF",
+            BC => "BC",
+            DE => "DE",
+            HL => "HL",
+            SP => "SP",
+            PC => "PC",
+        };
+
+        write!(f, "{}", st)
     }
 }
 
@@ -60,8 +95,15 @@ pub enum Flag {
 
 impl fmt::Display for Flag {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        // TODO:  implement me
-        unimplemented!()
+        use self::Flag::*;
+        let st = match *self {
+            Zf => "Z",
+            Nf => "N",
+            Hf => "H",
+            Cf => "C",
+        };
+
+        write!(f, "{}", st)
     }
 }
 

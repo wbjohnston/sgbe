@@ -20,6 +20,7 @@ impl Timer {
 
     /// Emulate the function of a timer over a given number of cycles
     pub fn emulate(&mut self, cycles: usize) {
+        // TODO: implement timer emmulation
         unimplemented!()
     }
 }

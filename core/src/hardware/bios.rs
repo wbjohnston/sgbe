@@ -19,7 +19,7 @@ type GbBiosInner = [Word; GB_BIOS_SIZE];
 
 type CgbBiosInner = [Word; CGB_BIOS_SIZE];
 
-/// A Gameboy bios
+/// A Gameboy bios marker
 pub trait Bios: Memory {}
 
 /// A Gameboy bios
@@ -46,7 +46,7 @@ impl From<GbBiosInner> for GbBios {
 }
 
 impl Debug for GbBios {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, _f: &mut fmt::Formatter) -> fmt::Result {
         unimplemented!()
     }
 }
@@ -61,8 +61,8 @@ impl Memory for CgbBios {
         self.0[address as usize]
     }
 
-    fn write(&mut self, address: Address, value: Word) {
-        unimplemented!()
+    fn write(&mut self, _address: Address, _value: Word) {
+        /* nop */
     }
 }
 
@@ -75,7 +75,7 @@ impl From<CgbBiosInner> for CgbBios {
 }
 
 impl Debug for CgbBios {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, _f: &mut fmt::Formatter) -> fmt::Result {
         unimplemented!()
     }
 }

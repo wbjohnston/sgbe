@@ -14,7 +14,7 @@ use system::Buttons;
 use hardware::bios::Bios;
 use hardware::memory::addresses::memory_map::*;
 use hardware::memory::Memory;
-use hardware::memory::{Memory16Kb, Memory4Kb, Memory8Kb};
+use hardware::memory::{Memory4Kb, Memory8Kb};
 use hardware::Cartridge;
 use isa::{Address, Word};
 
@@ -139,12 +139,13 @@ impl<S: Swram, B: Bios> Memory for MMU<S, B> {
                 Word::default()
             },
             OAM_OFFSET...OAM_END => self.oam[(address - OAM_OFFSET) as usize],
-            UNUSABLE_MEMORY_OFFSET...UNUSABLE_MEMORY_END => {
-                unreachable!("tried to read unreadable memory")
+            address @ UNUSABLE_MEMORY_OFFSET...UNUSABLE_MEMORY_END => {
+                warn!("Tried to read from unusable memory at address {}", address);
+                Word::default()
             }
             IOM_OFFSET...IOM_END => self.iom[(address - IOM_OFFSET) as usize],
             HRAM_OFFSET...HRAM_END => self.hram[(address - HRAM_OFFSET) as usize],
-            v => unreachable!("Tried to read unmmapped value: {}", v),
+            _ => unreachable!()
         }
     }
 
@@ -168,10 +169,17 @@ impl<S: Swram, B: Bios> Memory for MMU<S, B> {
                 cartridge.write(address - ECHO_RAM_OFFSET, value)
             },
             OAM_OFFSET...OAM_END => self.oam[(address - OAM_OFFSET) as usize] = value,
-            UNUSABLE_MEMORY_OFFSET...UNUSABLE_MEMORY_END => unreachable!(), // its not usable
+            address @ UNUSABLE_MEMORY_OFFSET...UNUSABLE_MEMORY_END => {
+                warn!("Tried to write to unusable memory at address {}", address)
+            },
             IOM_OFFSET...IOM_END => self.iom[(address - IOM_OFFSET) as usize] = value,
             HRAM_OFFSET...HRAM_END => self.hram[(address - HRAM_OFFSET) as usize] = value,
-            v => unreachable!("Tried to read unmmapped value: {:x}", v),
+            _ => unreachable!(),
         }
     }
+}
+
+#[cfg(test)]
+mod test {
+
 }

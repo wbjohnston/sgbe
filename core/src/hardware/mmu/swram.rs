@@ -109,14 +109,14 @@ impl Swram for Banked {}
 
 impl fmt::Display for Banked {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        // TODO: implement
+        // TODO: implement Display for Banked
         unimplemented!()
     }
 }
 
 impl fmt::Debug for Banked {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        // TODO: implement
+        // TODO: implement Debug for Banked
         unimplemented!()
     }
 }

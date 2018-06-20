@@ -24,7 +24,7 @@ impl PPU {
 
     /// Emulate the function of a `PPU` over a given number of cycles
     pub fn emulate<S: Swram, B: Bios>(&mut self, cycles: usize, mmu: &mut MMU<S, B>) {
-        debug!("GPU not yet implemented")
+        debug!("PPU not yet implemented")
         // TODO: implement PPU::emulate
     }
 }
