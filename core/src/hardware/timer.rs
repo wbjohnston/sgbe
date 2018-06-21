@@ -13,21 +13,16 @@
 pub struct Timer;
 
 impl Timer {
-    /// Create a new `Timer`
-    pub fn new() -> Self {
-        Timer {}
-    }
-
     /// Emulate the function of a timer over a given number of cycles
     pub fn emulate(&mut self, cycles: usize) {
         // TODO: implement timer emmulation
-        unimplemented!()
+        debug!("FIXME: timer not implemented")
     }
 }
 
 impl Default for Timer {
     fn default() -> Self {
         // TODO: implement Default for timer
-        unimplemented!()
+        Timer {}
     }
 }

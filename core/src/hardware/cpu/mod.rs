@@ -12,23 +12,39 @@ mod registers;
 pub use self::registers::Registers;
 
 use disasm::decode;
+use hardware::bios::Bios;
 use hardware::memory::Memory;
 use isa::{
     Address, Flag, Immediate16, Immediate8, Instruction, Register16, Register8, SignedImmediate8,
+    Word,
 };
+use std::fmt;
 
 pub const CYCLES_PER_SECOND: usize = 4_194_304;
 pub const BIOS_BUFFER_SIZE: usize = 0x900;
 
 /// A Gameboy central processing unit
-#[derive(Debug, Clone, Copy)]
-pub struct Cpu {
+#[derive(Clone, Copy)]
+pub struct Cpu<B: Bios> {
     ime: bool,
     is_halted: bool,
+    is_bios_disabled: bool,
+    bios: B,
     registers: Registers,
 }
 
-impl Cpu {
+impl<B: Bios> Cpu<B> {
+    pub fn new(bios: B) -> Self {
+        Cpu {
+            // interrupt master enable
+            ime: false,
+            bios,
+            is_bios_disabled: false,
+            is_halted: false,
+            registers: Registers::default(),
+        }
+    }
+
     /// Execute the current instruction and advance the CPU forward one step, Returns the
     /// number of cycles used
     pub fn step<M: Memory>(&mut self, memory: &mut M) -> u8 {
@@ -69,8 +85,8 @@ impl Cpu {
             LddAHl => self.execute_ldd_a_hl(memory),
             LddHlA => self.execute_ldd_hl_a(memory),
             LdHlR(register) => self.execute_ld_hl_r(register, memory),
-            Di => self.execute_di(memory),
-            Ei => self.execute_ei(memory),
+            Di => self.execute_di(),
+            Ei => self.execute_ei(),
             LdIocA => self.execute_ld_ioc_a(memory),
             LdAI(immediate) => self.execute_ld_a_i(immediate),
             LdRI(register, immediate) => self.execute_ld_r_i(register, immediate),
@@ -137,16 +153,16 @@ impl Cpu {
     }
 
     #[inline]
-    fn execute_di<M: Memory>(&mut self, memory: &mut M) -> bool {
+    fn execute_di(&mut self) -> bool {
         trace!("Executing di");
-        memory.write(0xFFFF, 0x00); // TODO: Is this the right value?
+        self.ime = false;
         false
     }
 
     #[inline]
-    fn execute_ei<M: Memory>(&mut self, memory: &mut M) -> bool {
+    fn execute_ei(&mut self) -> bool {
         trace!("Executing ei");
-        memory.write(0xFFFF, 0xFF); // TODO: is this the right value?
+        self.ime = true;
         false
     }
 
@@ -347,13 +363,9 @@ impl Cpu {
     }
 }
 
-impl Default for Cpu {
-    fn default() -> Self {
-        Cpu {
-            // interrupt master enable
-            ime: false,
-            is_halted: false,
-            registers: Registers::default(),
-        }
+impl<B: Bios + fmt::Debug> fmt::Debug for Cpu<B> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        // TODO: implement Cpu::debug
+        unimplemented!()
     }
 }

@@ -59,7 +59,7 @@ impl Cartridge {
 
         // make a timer if its required
         let timer = if catridge_type.has_timer() {
-            Some(Timer::new())
+            Some(Timer::default())
         } else {
             None
         };
@@ -94,6 +94,7 @@ impl Cartridge {
 
 impl Memory for Cartridge {
     fn read(&self, address: Address) -> Word {
+        // TODO: need to check the address to know whether to use mbc or rom0
         if let Some(ref mbc) = self.mbc {
             mbc.read(address)
         } else {
@@ -102,6 +103,7 @@ impl Memory for Cartridge {
     }
 
     fn write(&mut self, address: Address, value: Word) {
+        // TODO: need to check the address to know whether to use mbc or rom0
         if let Some(ref mut mbc) = self.mbc {
             mbc.write(address, value)
         }

@@ -92,7 +92,7 @@ impl<S: Swram> Mmu<S> {
 impl<S: Swram> Memory for Mmu<S> {
     /// Read a word from memory
     fn read(&self, address: Address) -> Word {
-        match address {
+        let val = match address {
             ROM0_OFFSET...ROM0_END => if let Some(ref cartridge) = self.cartridge {
                 cartridge.read(address - ROM0_OFFSET)
             } else {
@@ -124,11 +124,15 @@ impl<S: Swram> Memory for Mmu<S> {
             IOM_OFFSET...IOM_END => self.iom[(address - IOM_OFFSET) as usize],
             HRAM_OFFSET...HRAM_END => self.hram[(address - HRAM_OFFSET) as usize],
             _ => unreachable!(),
-        }
+        };
+        trace!("Read value of {:?} from address {:?}", val, address);
+
+        val
     }
 
     /// Write a `Word` to memory
     fn write(&mut self, address: Address, value: Word) {
+        trace!("Wrote value of {:?} to address {:?}", value, address);
         match address {
             ROM0_OFFSET...ROM0_END => if let Some(ref mut cartridge) = self.cartridge {
                 cartridge.write(address - ROM0_OFFSET, value)

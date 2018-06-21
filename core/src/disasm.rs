@@ -562,7 +562,7 @@ pub fn decode<M: Memory>(memory: &M, address: Address) -> Instruction {
         0xF5 => PushRr(AF),
         0xF6 => OrAI(memory.read(next_address) as Immediate8),
         0xF7 => Rst(memory.read(next_address) as Immediate8),
-        0xF8 => LdHlSp(memory.read(next_address) as SignedImmediate8),
+        0xF8 => LdHlSpS(memory.read(next_address) as SignedImmediate8),
         0xF9 => LdSpHl,
         0xFA => unimplemented!(), // TODO: implement me
         0xFB => Ei,

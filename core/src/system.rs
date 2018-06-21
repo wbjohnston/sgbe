@@ -19,10 +19,10 @@ use hardware::{Apu, Cpu, Mmu, Ppu};
 use isa::Address;
 
 /// Gameboy
-pub type Gb = System<swram::Fixed>;
+pub type Gb = System<swram::Fixed, GbBios>;
 
 /// Gameboy color
-pub type Cgb = System<swram::Banked>;
+pub type Cgb = System<swram::Banked, CgbBios>;
 
 /// Gameboy Keys state
 pub type Buttons = EnumSet<Button>;
@@ -42,20 +42,20 @@ enum_set_type! {
 }
 
 /// A Gameboy sytem
-pub struct System<S: Swram> {
+pub struct System<S: Swram, B: Bios> {
     input: Buttons,
-    cpu: Cpu,
+    cpu: Cpu<B>,
     mmu: Mmu<S>,
     gpu: Ppu,
     apu: Apu,
 }
 
-impl<S: Swram + Default> System<S> {
+impl<S: Swram + Default, B: Bios> System<S, B> {
     /// Create a new system with no loaded catridge
-    pub fn new<B: Bios>(bios: B) -> Self {
+    pub fn new(bios: B) -> Self {
         System {
             input: Buttons::empty(),
-            cpu: Cpu::default(),
+            cpu: Cpu::new(bios),
             mmu: Mmu::default(),
             gpu: Ppu::default(),
             apu: Apu::default(),
@@ -63,7 +63,7 @@ impl<S: Swram + Default> System<S> {
     }
 }
 
-impl<S: Swram> System<S> {
+impl<S: Swram, B: Bios> System<S, B> {
     /// Load a catridge into the system and return the old one if there was one
     pub fn load(&mut self, cartridge: Cartridge) -> Option<Cartridge> {
         self.mmu.load(cartridge)
@@ -76,6 +76,7 @@ impl<S: Swram> System<S> {
 
     /// Step the sytem forward on instruction execution
     pub fn step(&mut self) -> u8 {
+        // TODO: need to check interrupts
         self.mmu.update_input_registers(self.input); // update input state
 
         let cycles_in_step = self.cpu.step(&mut self.mmu);
@@ -85,10 +86,12 @@ impl<S: Swram> System<S> {
         cycles_in_step
     }
 
-    /// Emulate the system taking a specified number of steps
+    /// Emulate the system taking a specified number of cycles
     pub fn emulate(&mut self, cycles: usize) {
         let mut cycles = cycles; // TODO:  what happens when we get cycles not a multiple of 4?
         while cycles > 0 {
+            // FIXME: this logic allows for executing an instruction that takes 4 cycles when
+            // we're only emulating for 3 cycles
             cycles = cycles.saturating_sub(usize::from(self.step()));
         }
     }

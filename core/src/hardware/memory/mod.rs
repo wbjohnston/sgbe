@@ -61,11 +61,11 @@ pub struct Memory4Kb(Memory4KbInner);
 
 impl Memory for Memory4Kb {
     fn read(&self, address: Address) -> Word {
-        unimplemented!()
+        self.0[address as usize]
     }
 
     fn write(&mut self, address: Address, value: Word) {
-        unimplemented!()
+        self.0[address as usize] = value;
     }
 }
 
@@ -83,7 +83,8 @@ impl Default for Memory4Kb {
 
 impl fmt::Debug for Memory4Kb {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        unimplemented!()
+        // TODO: better debug pritning for Memory8Kb
+        write!(f, "Memory4Kb(..)")
     }
 }
 
@@ -115,7 +116,8 @@ impl Default for Memory8Kb {
 
 impl fmt::Debug for Memory8Kb {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        unimplemented!()
+        // TODO: better debug pritning for Memory8Kb
+        write!(f, "Memory8Kb(..)")
     }
 }
 
@@ -147,7 +149,8 @@ impl Default for Memory16Kb {
 
 impl fmt::Debug for Memory16Kb {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        unimplemented!()
+        // TODO: better debug print for Memory16Kb
+        write!(f, "Memory16Kb(..)")
     }
 }
 
@@ -184,6 +187,7 @@ impl Default for Memory32Kb {
 
 impl fmt::Debug for Memory32Kb {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        unimplemented!()
+        // TODO: better debug print for Memory32Kb
+        write!(f, "Memory32Kb(..)")
     }
 }

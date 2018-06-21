@@ -199,7 +199,7 @@ pub enum Instruction {
     AddSpS(SignedImmediate8),
     IncRr(Register16),
     DecRr(Register16),
-    LdHlSp(SignedImmediate8),
+    LdHlSpS(SignedImmediate8),
 
     // Rotate/shift commands
     Rlca,
@@ -314,6 +314,7 @@ impl Instruction {
 
             // 16-bit load instructions
             LdRrIi(_, _) => 12,
+            LdIiSp(_) => 20,
 
             LdSpHl => 8,
 
@@ -372,8 +373,7 @@ impl Instruction {
 
             DecRr(_) => 8,
 
-            LdHlSp(_) => 12,
-            LdIiSp(_) => unimplemented!(), // TODO:  implement me
+            LdHlSpS(_) => 12,
 
             // Shift and rotate commands
             Rlca => 4,
@@ -554,8 +554,8 @@ impl Instruction {
 
             DecRr(_) => 1,
 
-            LdHlSp(_) => 2,
-            LdIiSp(_) => unimplemented!(), // TODO:  implement me
+            LdHlSpS(_) => 2,
+            LdIiSp(_) => 3,
 
             // Shift and rotate commands
             Rlca => 1,

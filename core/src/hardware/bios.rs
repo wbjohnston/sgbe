@@ -46,8 +46,9 @@ impl From<GbBiosInner> for GbBios {
 }
 
 impl Debug for GbBios {
-    fn fmt(&self, _f: &mut fmt::Formatter) -> fmt::Result {
-        unimplemented!()
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        // TODO: implement GbBios::default
+        write!(f, "GbBios(..)")
     }
 }
 
@@ -75,7 +76,8 @@ impl From<CgbBiosInner> for CgbBios {
 }
 
 impl Debug for CgbBios {
-    fn fmt(&self, _f: &mut fmt::Formatter) -> fmt::Result {
-        unimplemented!()
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        // TODO: implement CgbBios::debug
+        write!(f, "CgbBios(..)")
     }
 }
